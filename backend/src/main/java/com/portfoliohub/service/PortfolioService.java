@@ -491,9 +491,24 @@ public class PortfolioService {
         notifications.notify(portfolio.getUserId(), "Nuevo mensaje de contacto", cleanName + " escribió desde tu portafolio.");
     }
 
-    @Transactional(readOnly = true)
-    public Map<String, Object> dashboard(UUID userId) {
+    @Transactional
+    public Portfolio openSite(UUID userId) {
         Portfolio portfolio = ensure(userId);
+        if (portfolio.getSlug() == null || portfolio.getSlug().isBlank()) {
+            portfolio.setSlug(uniqueSlug(portfolio.getTitle(), portfolio.getId()));
+        }
+        if (portfolio.getStatus() == PortfolioStatus.DRAFT) {
+            portfolio.setStatus(PortfolioStatus.PUBLISHED);
+            portfolio.setPublishedAt(Instant.now());
+            portfolio.setConsentToPublish(true);
+        }
+        save(portfolio);
+        return portfolio;
+    }
+
+    @Transactional
+    public Map<String, Object> dashboard(UUID userId) {
+        Portfolio portfolio = openSite(userId);
         PersonalProfile personal = personalProfiles.findById(userId).orElseThrow();
         AcademicRecord academic = academicRecords.findFirstByUserIdAndPrimaryRecordTrueOrderByUpdatedAtDesc(userId).orElse(null);
         int score = 0;
@@ -576,6 +591,31 @@ public class PortfolioService {
             return null;
         }
         return properties.getPublicBaseUrl() + "/p/" + portfolio.getSlug();
+    }
+
+    private String uniqueSlug(String title, UUID self) {
+        String base = Texts.slug(title);
+        if (base.length() < 3) {
+            base = "sitio";
+        }
+        String candidate = base;
+        int suffix = 2;
+        while (slugTaken(candidate, self)) {
+            candidate = base + "-" + suffix;
+            suffix++;
+        }
+        return candidate;
+    }
+
+    private boolean slugTaken(String candidate, UUID self) {
+        try {
+            Texts.checkSlug(candidate);
+        } catch (ApiException exception) {
+            return true;
+        }
+        return portfolios.findBySlugIgnoreCase(candidate)
+                .filter(found -> self == null || !found.getId().equals(self))
+                .isPresent();
     }
 
     private Portfolio create(UUID userId) {
@@ -692,8 +732,9 @@ public class PortfolioService {
         body.put("recruiterViewEnabled", portfolio.isRecruiterViewEnabled());
         body.put("disclaimer", config == null ? null : config.getDisclaimer());
         body.put("studentSafe", config != null && config.isStudentSafe());
-        body.put("whatsappEnabled", portfolio.isWhatsappEnabled());
-        body.put("whatsappNumber", portfolio.isWhatsappEnabled() && personal.getPhone() != null ? personal.getPhone().replaceAll("\\D", "") : null);
+        String whatsapp = personal.getPhone() == null ? "" : personal.getPhone().replaceAll("\\D", "");
+        body.put("whatsappEnabled", !whatsapp.isEmpty());
+        body.put("whatsappNumber", whatsapp.isEmpty() ? null : whatsapp);
         body.put("sections", visible);
         body.put("person", personView(user, personal, professional, portfolio));
         body.put("academicLabel", academicLabel(academic, career, config));

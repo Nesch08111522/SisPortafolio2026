@@ -43,40 +43,30 @@ public class EmbeddedPostgresEnvironmentPostProcessor implements EnvironmentPost
         }
         synchronized (EmbeddedPostgresEnvironmentPostProcessor.class) {
             if (postgres == null) {
-                IllegalStateException locked = null;
-                try {
-                    for (String folder : new String[] {"postgres", "postgres-local", "pg"}) {
-                        try {
-                            postgres = open(Path.of("data", folder));
-                            locked = null;
-                            break;
-                        } catch (IllegalStateException exception) {
-                            if (exception.getMessage() == null || !exception.getMessage().contains("could not lock")) {
-                                throw exception;
-                            }
-                            locked = exception;
-                        }
+                Exception lastFailure = null;
+                for (String folder : new String[] {"pg-app", "pg", "postgres-local", "postgres"}) {
+                    try {
+                        postgres = open(Path.of("data", folder));
+                        lastFailure = null;
+                        break;
+                    } catch (IOException | IllegalStateException exception) {
+                        lastFailure = exception;
                     }
-                    if (postgres == null) {
-                        throw new IllegalStateException(
-                                "No se pudo iniciar PostgreSQL embebido. Instala PostgreSQL o define SPRING_DATASOURCE_URL.",
-                                locked
-                        );
-                    }
-                    jdbcUrl = postgres.getJdbcUrl("postgres", "postgres");
-                    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                        try {
-                            postgres.close();
-                        } catch (IOException ignored) {
-                            // El proceso ya está terminando.
-                        }
-                    }));
-                } catch (IOException exception) {
+                }
+                if (postgres == null) {
                     throw new IllegalStateException(
                             "No se pudo iniciar PostgreSQL embebido. Instala PostgreSQL o define SPRING_DATASOURCE_URL.",
-                            exception
+                            lastFailure
                     );
                 }
+                jdbcUrl = postgres.getJdbcUrl("postgres", "postgres");
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    try {
+                        postgres.close();
+                    } catch (IOException ignored) {
+                        // El proceso ya está terminando.
+                    }
+                }));
             }
         }
         Map<String, Object> values = new HashMap<>();

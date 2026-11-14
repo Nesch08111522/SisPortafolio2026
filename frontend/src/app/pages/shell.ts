@@ -7,7 +7,8 @@ import { AuthService } from '../core/auth.service';
   imports: [RouterOutlet, RouterLink, RouterLinkActive],
   template: `
     <div class="shell">
-      <aside class="sidebar" [class.open]="open()">
+      @if (open()) { <button class="scrim" type="button" aria-label="Cerrar menú" (click)="open.set(false)"></button> }
+      <aside class="sidebar" id="navegacion" [class.open]="open()">
         <div class="brand"><span class="mark">P</span> Portfolio Hub</div>
         <a routerLink="/app" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="open.set(false)">Panel</a>
         <a routerLink="/app/perfil" routerLinkActive="active" (click)="open.set(false)">Perfil</a>
@@ -25,7 +26,7 @@ import { AuthService } from '../core/auth.service';
       </aside>
       <div class="page">
         <header class="topbar">
-          <button class="btn-ghost menu" type="button" (click)="open.set(!open())">Menú</button>
+          <button class="btn-ghost menu" type="button" [attr.aria-expanded]="open()" aria-controls="navegacion" (click)="open.set(!open())">Menú</button>
           <strong>{{ auth.user()?.firstName }} {{ auth.user()?.lastName }}</strong>
         </header>
         <router-outlet />

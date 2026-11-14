@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Academic, ApiService, Country, Dashboard, Faculty, Named, ProfileResponse } from '../core/api.service';
+import { Steps } from './steps';
 import { errorText } from '../core/auth.service';
 
 function blank(value: string | null | undefined): string | null {
@@ -11,9 +12,12 @@ function blank(value: string | null | undefined): string | null {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink],
+  imports: [RouterLink, Steps],
   template: `
-    <h1>Tu portafolio</h1>
+    <app-steps />
+    <p class="page-kicker">Panel</p>
+    <h1 class="page-title">Tu sitio</h1>
+    <p class="lede">Para continuar, elige facultad y carrera, sube tus archivos y selecciona uno de los diez diseños.</p>
     @if (data(); as item) {
       <div class="progress" aria-label="Avance del perfil"><span [style.width.%]="item.completion"></span></div>
       <p class="note">Perfil completado al {{ item.completion }} %. Estado: {{ item.publicationStatus }}.</p>
@@ -23,12 +27,14 @@ function blank(value: string | null | undefined): string | null {
         <article class="stat"><b>{{ item.courses }}</b> cursos</article>
         <article class="stat"><b>{{ item.certifications }}</b> certificaciones</article>
       </div>
-      @if (item.publicUrl) { <p><a [href]="item.publicUrl" target="_blank" rel="noopener noreferrer">{{ item.publicUrl }}</a></p> }
+      @if (item.publicUrl) {
+        <p class="site-link">Tu sitio <a [href]="item.publicUrl" target="_blank" rel="noopener noreferrer">{{ item.publicUrl }}</a></p>
+      }
       <div class="list" style="margin-top:1rem">
         @for (tip of item.recommendations; track tip) { <p class="card">{{ tip }}</p> }
         @if (!item.recommendations.length) { <p class="card">El perfil tiene los datos mínimos. Revisa la vista previa antes de publicar.</p> }
       </div>
-      <p class="actions"><a class="btn" routerLink="/app/academico">Continuar formación</a> <a class="btn-ghost" routerLink="/app/editor">Abrir editor</a></p>
+      <p class="actions"><a class="btn" routerLink="/app/academico">Elegir facultad y carrera</a> <a class="btn-ghost" routerLink="/app/disenos">Ver diseños</a></p>
     }
   `
 })
@@ -42,7 +48,8 @@ export class DashboardPage {
   selector: 'app-profile',
   imports: [ReactiveFormsModule],
   template: `
-    <h1>Perfil personal y profesional</h1>
+    <p class="page-kicker">Identidad</p>
+    <h1 class="page-title">Perfil personal y profesional</h1>
     <form [formGroup]="form" (ngSubmit)="save()">
       <div class="grid-2">
         <label>Nombres<input formControlName="firstName"></label>
@@ -210,10 +217,12 @@ export class ProfilePage {
 
 @Component({
   selector: 'app-academic',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Steps],
   template: `
-    <h1>Configuración académica</h1>
-    <p class="note">Puedes completarla por partes. El estado académico es necesario para guardar. Elegir la carrera cambia las secciones recomendadas sin borrar el texto que ya escribiste.</p>
+    <app-steps />
+    <p class="page-kicker">Carrera</p>
+    <h1 class="page-title">Facultad, carrera y ciclo</h1>
+    <p class="note">Primero la facultad. Después aparecen sus carreras. Indica el ciclo o semestre y guarda. La carrera cambia las secciones del sitio y conserva el texto que ya escribiste.</p>
     <form [formGroup]="form" (ngSubmit)="save()">
       <label>Buscar universidad<input formControlName="universityQuery"></label>
       <button class="btn-ghost" type="button" (click)="searchUniversities()">Buscar</button>
@@ -269,6 +278,7 @@ export class ProfilePage {
 export class AcademicPage {
   private readonly api = inject(ApiService);
   private readonly forms = inject(FormBuilder);
+  private readonly router = inject(Router);
   readonly faculties = signal<Faculty[]>([]);
   readonly careers = signal<{ id: string; name: string }[]>([]);
   readonly specializations = signal<Named[]>([]);
@@ -322,6 +332,11 @@ export class AcademicPage {
 
   save(): void {
     const value = this.form.getRawValue();
+    if (!value.careerId) {
+      this.failed.set(true);
+      this.message.set('Selecciona una carrera para continuar con los archivos.');
+      return;
+    }
     const year = Number(value.admissionYear);
     this.api.saveAcademic({
       universityId: blank(value.universityId),
@@ -338,7 +353,7 @@ export class AcademicPage {
       professionalGoals: blank(value.professionalGoals),
       licenseDeclared: value.licenseDeclared
     }).subscribe({
-      next: () => { this.failed.set(false); this.message.set('Formación guardada. Las secciones de tu carrera ya están disponibles en el editor.'); },
+      next: () => { void this.router.navigateByUrl('/app/documentos'); },
       error: (err) => { this.failed.set(true); this.message.set(errorText(err)); }
     });
   }

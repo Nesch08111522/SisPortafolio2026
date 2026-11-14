@@ -1,20 +1,27 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { ApiService, PortfolioView, SectionState, TemplateCard, VersionItem } from '../core/api.service';
 import { errorText } from '../core/auth.service';
 import { FolioView } from '../folio/folio-view';
+import { Steps } from './steps';
 
 @Component({
   selector: 'app-designs',
-  imports: [],
+  imports: [FolioView, RouterLink, Steps],
   template: `
-    <h1>Diez diseños para tu carrera</h1>
+    <app-steps />
+    <p class="page-kicker">Composiciones</p>
+    <h1 class="page-title">Diez diseños para tu carrera</h1>
     <p class="note">Son diez familias visuales con la estructura de tu carrera. Cambiar de diseño conserva el texto de las secciones que comparten clave.</p>
     @if (message()) { <p [class.error]="failed()">{{ message() }}</p> }
     <div class="design-grid">
       @for (item of designs(); track item.templateId) {
         <article class="card design-card">
-          <p class="note">{{ item.layout }}</p>
+          <p class="page-kicker">{{ rank(item.layout) }}</p>
+          <div class="design-stage">
+            <app-folio-view [view]="preview()" [layoutOverride]="item.layout" [themeOverride]="item.theme ?? null" />
+          </div>
           <h2>{{ item.name }}</h2>
           <p>{{ item.variantName }}</p>
           <p>{{ item.description }}</p>
@@ -39,22 +46,32 @@ import { FolioView } from '../folio/folio-view';
 })
 export class DesignsPage {
   private readonly api = inject(ApiService);
+  private readonly router = inject(Router);
   readonly designs = signal<TemplateCard[]>([]);
   readonly compared = signal<TemplateCard[]>([]);
+  readonly preview = signal<PortfolioView | null>(null);
   readonly message = signal('');
   readonly failed = signal(false);
+  private readonly ranks: Record<string, string> = {
+    minimal: '01 · Sencillo', corporate: '02 · Corporativo', tech: '03 · Tecnológico', editorial: '04 · Editorial',
+    creative: '05 · Creativo', academic: '06 · Académico', executive: '07 · Ejecutivo', experimental: '08 · Experimental',
+    dark: '09 · Oscuro', premium: '10 · Profesional'
+  };
   constructor() {
-    this.api.profile().subscribe((profile) => {
-      this.api.recommended(profile.academic?.careerId).subscribe((items) => this.designs.set(items));
+    this.api.preview().subscribe({ next: (view) => this.preview.set(view), error: () => undefined });
+    this.api.profile().subscribe({
+      next: (profile) => this.api.recommended(profile.academic?.careerId).subscribe((items) => this.designs.set(items)),
+      error: () => this.designs.set([])
     });
   }
+  rank(layout: string): string { return this.ranks[layout] ?? layout; }
   pin(item: TemplateCard): void {
     const current = this.compared();
     this.compared.set(current.includes(item) ? current.filter((entry) => entry !== item) : [...current, item].slice(-2));
   }
   apply(templateId: string): void {
     this.api.applyTemplate(templateId).subscribe({
-      next: () => { this.failed.set(false); this.message.set('Diseño aplicado. El contenido anterior sigue en las secciones compatibles y quedó una versión de respaldo.'); },
+      next: () => { void this.router.navigateByUrl('/app/editor'); },
       error: (err) => { this.failed.set(true); this.message.set(errorText(err)); }
     });
   }
@@ -62,10 +79,13 @@ export class DesignsPage {
 
 @Component({
   selector: 'app-editor',
-  imports: [FormsModule, FolioView],
+  imports: [FormsModule, FolioView, RouterLink, Steps],
   template: `
-    <h1>Editor</h1>
-    <p>{{ status() || 'Los cambios de texto se guardan solos.' }}</p>
+    <app-steps />
+    <p class="page-kicker">Composición</p>
+    <h1 class="page-title">Editor</h1>
+    @if (publicUrl()) { <p class="site-link">Tu sitio <a [href]="publicUrl()" target="_blank" rel="noopener noreferrer">{{ publicUrl() }}</a></p> }
+    <p class="note">{{ status() || 'Los cambios de texto se guardan solos.' }}</p>
     <div class="device-switch">
       <button class="btn-ghost" type="button" (click)="device.set('desktop')">Escritorio</button>
       <button class="btn-ghost" type="button" (click)="device.set('tablet')">Tablet</button>
@@ -111,6 +131,7 @@ export class EditorPage {
   readonly preview = signal<PortfolioView | null>(null);
   readonly device = signal('desktop');
   readonly status = signal('');
+  readonly publicUrl = signal('');
   readonly bilingual = signal(false);
   private version = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
@@ -190,7 +211,9 @@ export class EditorPage {
       this.versions.set(state.versions);
       this.version = state.portfolio.version;
       this.bilingual.set(state.portfolio.bilingual);
+      this.publicUrl.set(state.portfolio.publicUrl ?? '');
     });
     this.api.preview().subscribe((view) => this.preview.set(view));
+    this.api.dashboard().subscribe({ next: (item) => this.publicUrl.set(item.publicUrl ?? ''), error: () => undefined });
   }
 }

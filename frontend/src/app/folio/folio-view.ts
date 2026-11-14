@@ -1,11 +1,12 @@
 import { Component, Input, OnChanges, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Title, Meta } from '@angular/platform-browser';
-import { ApiService, PortfolioView, ProjectView, SectionState } from '../core/api.service';
+import { ApiService, PortfolioView, ProjectView, SectionState, Theme } from '../core/api.service';
 
 @Component({
   selector: 'app-folio-view',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './folio-view.html'
 })
 export class FolioView implements OnChanges {
@@ -13,7 +14,16 @@ export class FolioView implements OnChanges {
   private readonly meta = inject(Meta);
   private readonly api = inject(ApiService);
   private readonly forms = inject(FormBuilder);
+  readonly pages = [
+    { id: 'inicio', label: 'Inicio' },
+    { id: 'trabajos', label: 'Proyectos' },
+    { id: 'formacion', label: 'Formación' },
+    { id: 'cv', label: 'CV' },
+    { id: 'certificados', label: 'Certificados' },
+    { id: 'contacto', label: 'Contacto' }
+  ];
   readonly locale = signal<'es' | 'en'>('es');
+  readonly current = signal('inicio');
   readonly recruiter = signal(false);
   readonly sent = signal('');
   readonly contactForm = this.forms.nonNullable.group({
@@ -25,8 +35,12 @@ export class FolioView implements OnChanges {
 
   @Input() view: PortfolioView | null = null;
   @Input() slug = '';
+  @Input() layoutOverride = '';
+  @Input() themeOverride: Theme | null = null;
+  @Input() page = '';
 
   ngOnChanges(): void {
+    if (this.layoutOverride) return;
     const view = this.view;
     if (!view?.seo) return;
     this.titles.setTitle(view.seo.title);
@@ -96,12 +110,50 @@ export class FolioView implements OnChanges {
     return Array.isArray(value) ? value as { title?: string; description?: string }[] : [];
   }
 
+  pageKey(): string {
+    const value = (this.page || this.current()).toLowerCase();
+    return this.pages.some((item) => item.id === value) ? value : 'inicio';
+  }
+
+  pageLabel(): string {
+    return this.pages.find((item) => item.id === this.pageKey())?.label ?? 'Inicio';
+  }
+
+  go(id: string): void {
+    this.current.set(id);
+  }
+
+  onPage(section: SectionState): boolean {
+    const groups: Record<string, string[]> = {
+      inicio: ['richtext', 'areas'],
+      trabajos: ['projects', 'gallery', 'achievements', 'services'],
+      formacion: ['education', 'courses', 'publications'],
+      cv: ['education', 'experiences', 'skills', 'certifications'],
+      certificados: ['certifications'],
+      contacto: ['contact']
+    };
+    return (groups[this.pageKey()] ?? []).includes(section.component);
+  }
+
+  hasPage(): boolean {
+    return (this.view?.sections ?? []).some((section) => section.visible && this.onPage(section));
+  }
+
+  activeLayout(): string {
+    if (this.recruiter()) return 'executive';
+    return this.layoutOverride || this.view?.layout || 'minimal';
+  }
+
+  palette(): Theme {
+    return { ...(this.view?.theme ?? {}), ...(this.themeOverride ?? {}) };
+  }
+
   heading(): string {
-    return `"${this.view?.theme.fontHeading || 'Fraunces'}", Georgia, serif`;
+    return `"${this.palette().fontHeading || 'Fraunces'}", Georgia, serif`;
   }
 
   bodyFont(): string {
-    return `"${this.view?.theme.fontBody || 'Outfit'}", sans-serif`;
+    return `"${this.palette().fontBody || 'Outfit'}", sans-serif`;
   }
 
   send(): void {

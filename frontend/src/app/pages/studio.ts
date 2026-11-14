@@ -1,7 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { ApiService, CertItem, CourseItem, DocumentItem, ExperienceItem, Extraction, ProjectItem, PublicationItem, SkillItem } from '../core/api.service';
 import { errorText } from '../core/auth.service';
+import { Steps } from './steps';
 
 function blank(value: string | null | undefined): string | null {
   const trimmed = (value ?? '').trim();
@@ -10,9 +12,11 @@ function blank(value: string | null | undefined): string | null {
 
 @Component({
   selector: 'app-studio',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Steps],
   template: `
-    <h1>Contenido del portafolio</h1>
+    <app-steps />
+    <p class="page-kicker">Obra</p>
+    <h1 class="page-title">Contenido del portafolio</h1>
     <div class="tabs" role="tablist">
       @for (item of tabs; track item.id) {
         <button type="button" role="tab" [attr.aria-selected]="tab() === item.id" (click)="tab.set(item.id)">{{ item.label }}</button>
@@ -230,10 +234,12 @@ export class StudioPage {
 
 @Component({
   selector: 'app-documents',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink, Steps],
   template: `
-    <h1>Documentos</h1>
-    <p class="note">Los archivos quedan privados, salvo la fotografía de perfil o los que marques como visibles. La extracción solo propone datos: debes revisarlos antes de guardarlos.</p>
+    <app-steps />
+    <p class="page-kicker">Archivo</p>
+    <h1 class="page-title">Certificados, cursos y CV</h1>
+    <p class="note">Sube el CV, los certificados y las constancias. La extracción propone datos y tú los confirmas antes de que entren al sitio. Los archivos quedan privados, salvo la fotografía o los que marques como visibles.</p>
     <form [formGroup]="form">
       <label>Archivo<input type="file" (change)="choose($event)"></label>
       <label>Tipo
@@ -272,12 +278,22 @@ export class StudioPage {
         <button class="btn" type="submit">Confirmar datos revisados</button>
       </form>
     }
+    @if (courses().length || certs().length) {
+      <h2>Ya quedó en tu sitio</h2>
+      <div class="list">
+        @for (item of courses(); track item.id) { <article class="card"><strong>{{ item.name }}</strong><p>Curso · {{ item.institution }}</p></article> }
+        @for (item of certs(); track item.id) { <article class="card"><strong>{{ item.name }}</strong><p>Certificación · {{ item.issuer }}</p></article> }
+      </div>
+      <p class="actions"><a class="btn" routerLink="/app/disenos">Elegir uno de los diez diseños</a></p>
+    }
   `
 })
 export class DocumentsPage {
   private readonly api = inject(ApiService);
   private readonly forms = inject(FormBuilder);
   readonly documents = signal<DocumentItem[]>([]);
+  readonly courses = signal<CourseItem[]>([]);
+  readonly certs = signal<CertItem[]>([]);
   readonly extraction = signal<Extraction | null>(null);
   readonly message = signal('');
   readonly failed = signal(false);
@@ -287,7 +303,7 @@ export class DocumentsPage {
   readonly form = this.forms.nonNullable.group({ category: ['CERTIFICATE'], visibleOnPortfolio: [false] });
   readonly review = this.forms.nonNullable.group({ target: ['COURSE'], name: ['', Validators.required], institution: [''], date: [''], hours: [''], description: [''] });
 
-  constructor() { this.reload(); }
+  constructor() { this.reload(); this.reloadSaved(); }
 
   choose(event: Event): void { this.file = (event.target as HTMLInputElement).files?.[0] ?? null; }
 
@@ -308,7 +324,9 @@ export class DocumentsPage {
         const suggestion = item.suggestion ?? {};
         const notes = Array.isArray(suggestion['notes']) ? (suggestion['notes'] as string[]).join(' ') : '';
         this.suggestionText.set(`${suggestion['authenticity'] ?? ''} ${suggestion['textSample'] ?? ''} ${notes}`.trim());
+        const fileName = String(suggestion['fileName'] ?? '').replace(/\.[^.]+$/, '');
         this.review.patchValue({
+          name: fileName,
           institution: String(suggestion['suggestedInstitution'] ?? ''),
           hours: suggestion['suggestedHours'] ? String(suggestion['suggestedHours']) : '',
           description: ''
@@ -326,10 +344,14 @@ export class DocumentsPage {
     this.api.confirm(this.documentId, current.id, {
       target: value.target, name: value.name, institution: blank(value.institution), date: blank(value.date),
       hours: value.hours ? Number(value.hours) : null, description: blank(value.description)
-    }).subscribe({ next: () => { this.ok('Información confirmada por ti.'); this.extraction.set(null); }, error: (err) => this.fail(err) });
+    }).subscribe({ next: () => { this.ok('Información confirmada. Ya puede verse en Formación, CV o Certificados.'); this.extraction.set(null); this.reloadSaved(); }, error: (err) => this.fail(err) });
   }
 
   private reload(): void { this.api.documents().subscribe((items) => this.documents.set(items)); }
+  private reloadSaved(): void {
+    this.api.courses().subscribe({ next: (items) => this.courses.set(items), error: () => undefined });
+    this.api.certifications().subscribe({ next: (items) => this.certs.set(items), error: () => undefined });
+  }
   private ok(text: string): void { this.failed.set(false); this.message.set(text); }
   private fail(err: unknown): void { this.failed.set(true); this.message.set(errorText(err)); }
   private failMessage(text: string): void { this.failed.set(true); this.message.set(text); }

@@ -19,6 +19,7 @@ export const routes: Routes = [
   { path: 'terminos', component: Terms },
   { path: 'ejemplos', component: Examples },
   { path: 'p/:slug', component: PublicFolioPage },
+  { path: 'p/:slug/:page', component: PublicFolioPage },
   {
     path: 'app',
     component: Shell,

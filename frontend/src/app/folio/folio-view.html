@@ -1,12 +1,22 @@
 @if (view) {
-  <article class="folio" [attr.data-layout]="recruiter() ? 'executive' : view.layout" [attr.data-mode]="view.theme.mode" [attr.data-button]="view.theme.buttonStyle"
-    [style.--accent]="view.theme.accent || '#0f5c45'" [style.--bg]="view.theme.background || '#f7f4ef'" [style.--surface]="view.theme.surface || '#fff'" [style.--text]="view.theme.text || '#1c1915'"
-    [style.--heading]="heading()" [style.--body]="bodyFont()" [style.--radius]="view.theme.radius || '16'">
-    <div class="folio-inner">
+  <article class="folio" [attr.data-layout]="activeLayout()" [attr.data-mode]="palette().mode || 'light'" [attr.data-button]="palette().buttonStyle || 'solid'"
+    [style.--accent]="palette().accent || '#0f5c45'" [style.--accent-2]="palette().accent2 || '#1c1915'" [style.--bg]="palette().background || '#f7f4ef'" [style.--surface]="palette().surface || '#fff'" [style.--text]="palette().text || '#1c1915'" [style.--muted-folio]="palette().muted || '#5e584e'"
+    [style.--heading]="heading()" [style.--body]="bodyFont()" [style.--radius]="palette().radius || '16'">
+    <div class="folio-frame">
       <header class="folio-hero">
-        @if (view.person.photoUrl) { <img [src]="view.person.photoUrl" [alt]="'Fotografía de ' + view.person.firstName" width="120" height="120" style="width:120px;height:120px;object-fit:cover;border-radius:1rem"> }
+        @if (view.person.photoUrl) { <img class="folio-photo" [src]="view.person.photoUrl" [alt]="'Fotografía de ' + view.person.firstName" width="148" height="184"> }
         <p class="kicker">{{ view.academicLabel || 'Portafolio profesional' }}</p>
         <h1>{{ view.person.firstName }} {{ view.person.lastName }}</h1>
+        <nav class="site-nav" aria-label="Páginas del sitio">
+          @for (item of pages; track item.id) {
+            @if (slug) {
+              <a [routerLink]="item.id === 'inicio' ? ['/p', slug] : ['/p', slug, item.id]" [attr.aria-current]="pageKey() === item.id ? 'page' : null">{{ item.label }}</a>
+            } @else {
+              <button type="button" [attr.aria-current]="pageKey() === item.id ? 'page' : null" (click)="go(item.id)">{{ item.label }}</button>
+            }
+          }
+        </nav>
+        @if (pageKey() === 'inicio') {
         <p>{{ locale() === 'en' && view.person.bioEn ? view.person.bioEn : view.person.bio }}</p>
         @if (view.person.location) { <p>{{ view.person.location }}</p> }
         <div class="actions">
@@ -14,11 +24,15 @@
           @if (view.bilingual) { <button type="button" class="button" (click)="locale.set(locale() === 'es' ? 'en' : 'es')">{{ locale() === 'es' ? 'English' : 'Español' }}</button> }
           @if (view.recruiterViewEnabled) { <button type="button" class="button" (click)="recruiter.set(!recruiter())">{{ recruiter() ? 'Vista completa' : 'Modo reclutador' }}</button> }
         </div>
+        }
       </header>
-      @if (view.disclaimer) { <p class="disclaimer">{{ view.disclaimer }}</p> }
+      <div class="folio-main">
+      @if (view.disclaimer && pageKey() === 'inicio') { <p class="disclaimer">{{ view.disclaimer }}</p> }
+      @if (pageKey() !== 'inicio') { <h2>{{ pageLabel() }}</h2> }
+      @if (!hasPage()) { <p class="empty">Esta página se llena desde el editor, con lo que tú escribas.</p> }
       @for (section of view.sections; track section.sectionKey) {
-        @if (!recruiter() || section.component === 'education' || section.component === 'skills' || section.component === 'projects' || section.component === 'contact' || section.component === 'richtext') {
-          <section>
+        @if (section.visible && onPage(section) && (!recruiter() || section.component === 'education' || section.component === 'skills' || section.component === 'projects' || section.component === 'contact' || section.component === 'richtext')) {
+          <section class="folio-block" [attr.data-component]="section.component">
             <h2>{{ section.title }}</h2>
             @switch (section.component) {
               @case ('richtext') { <p>{{ text(section) || 'Esta sección todavía no tiene texto.' }}</p> }
@@ -112,6 +126,7 @@
         }
       }
       <footer class="folio-footer"><span>Creado con Portfolio Hub</span><span>{{ view.person.firstName }} {{ view.person.lastName }}</span></footer>
+      </div>
     </div>
     @if (view.whatsappEnabled && view.whatsappNumber) {
       <a class="wa" [href]="'https://wa.me/' + view.whatsappNumber" target="_blank" rel="noopener noreferrer" aria-label="Escribir por WhatsApp">WA</a>

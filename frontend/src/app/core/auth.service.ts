@@ -13,7 +13,7 @@ export interface UserView {
   roles: string[];
 }
 
-interface AuthResponse {
+export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
   expiresIn: number;
@@ -43,7 +43,7 @@ export class AuthService {
   }
 
   register(body: Record<string, unknown>) {
-    return this.http.post<Record<string, string>>(`${API}/auth/register`, body);
+    return this.http.post<AuthResponse>(`${API}/auth/register`, body);
   }
 
   login(email: string, password: string) {

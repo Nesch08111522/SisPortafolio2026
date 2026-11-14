@@ -47,6 +47,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final MailService mailService;
     private final AuditService auditService;
+    private final PortfolioService portfolios;
     private final AppProperties properties;
     private final String dummyHash;
 
@@ -62,6 +63,7 @@ public class AuthService {
             JwtService jwtService,
             MailService mailService,
             AuditService auditService,
+            PortfolioService portfolios,
             AppProperties properties
     ) {
         this.users = users;
@@ -75,6 +77,7 @@ public class AuthService {
         this.jwtService = jwtService;
         this.mailService = mailService;
         this.auditService = auditService;
+        this.portfolios = portfolios;
         this.properties = properties;
         this.dummyHash = passwordEncoder.encode("dummy-password-not-used");
     }
@@ -102,7 +105,7 @@ public class AuthService {
         user.setFirstName(requiredName(command.firstName(), "El nombre es obligatorio."));
         user.setLastName(requiredName(command.lastName(), "Los apellidos son obligatorios."));
         user.setCountryCode(country);
-        user.setEmailVerified(false);
+        user.setEmailVerified(true);
         user.setEnabled(true);
         user.setTermsAcceptedAt(Instant.now());
         user.setTermsVersion(TERMS_VERSION);
@@ -117,15 +120,9 @@ public class AuthService {
         professional.setUserId(user.getId());
         professionalProfiles.save(professional);
 
-        String rawToken = issueToken(user.getId(), TokenType.EMAIL_VERIFICATION, 24);
-        String link = properties.getPublicBaseUrl() + "/verificar-correo?token=" + rawToken;
-        mailService.send(email, "Confirma tu cuenta de Portfolio Hub",
-                "Hola " + user.getFirstName() + ",\n\nConfirma tu correo para activar la cuenta:\n" + link + "\n\nEl enlace vence en 24 horas.");
+        portfolios.openSite(user.getId());
         auditService.record(user.getId(), "REGISTER", "USER", user.getId().toString(), null, ip);
-        if (properties.getMail().isExposeDevLink()) {
-            return Map.of("message", "Revisa tu correo para confirmar la cuenta.", "devVerificationUrl", link);
-        }
-        return Map.of("message", "Revisa tu correo para confirmar la cuenta.");
+        return tokens(user);
     }
 
     @Transactional
@@ -140,15 +137,7 @@ public class AuthService {
 
     @Transactional
     public Map<String, Object> resend(String email) {
-        users.findByEmailIgnoreCase(normalizeEmail(email)).ifPresent(user -> {
-            if (!user.isEmailVerified()) {
-                String rawToken = issueToken(user.getId(), TokenType.EMAIL_VERIFICATION, 24);
-                String link = properties.getPublicBaseUrl() + "/verificar-correo?token=" + rawToken;
-                mailService.send(user.getEmail(), "Confirma tu cuenta de Portfolio Hub",
-                        "Confirma tu correo:\n" + link);
-            }
-        });
-        return Map.of("message", "Si la cuenta existe y aún no está confirmada, enviaremos un nuevo correo.");
+        return Map.of("message", "La cuenta queda activa al crearla. No enviamos un código por correo.");
     }
 
     @Transactional
@@ -174,7 +163,7 @@ public class AuthService {
             throw ApiException.unauthorized("Esta cuenta está deshabilitada.");
         }
         if (!user.isEmailVerified()) {
-            throw ApiException.unauthorized("Confirma tu correo electrónico antes de iniciar sesión.");
+            user.setEmailVerified(true);
         }
         user.setFailedLoginAttempts(0);
         user.setLockedUntil(null);

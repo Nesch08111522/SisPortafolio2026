@@ -8,7 +8,8 @@ import { AuthService, errorText } from '../core/auth.service';
   selector: 'app-publish',
   imports: [ReactiveFormsModule],
   template: `
-    <h1>Publicación</h1>
+    <p class="page-kicker">Salida</p>
+    <h1 class="page-title">Publicación</h1>
     <p class="note">El sitio solo queda público si confirmas la publicación. Un borrador no se abre cambiando la dirección.</p>
     <form [formGroup]="form" (ngSubmit)="publish()">
       <label>Identificador de la URL<input formControlName="slug" (blur)="checkSlug()"></label>
@@ -146,7 +147,8 @@ export class PublishPage {
 @Component({
   selector: 'app-messages',
   template: `
-    <h1>Mensajes y avisos</h1>
+    <p class="page-kicker">Bandeja</p>
+    <h1 class="page-title">Mensajes y avisos</h1>
     <div class="list">
       @for (item of messages(); track item.id) { <article class="card"><strong>{{ item.name }}</strong><p>{{ item.email }}</p><p>{{ item.message }}</p></article> }
       @if (!messages().length) { <p class="empty">No hay mensajes de contacto.</p> }
@@ -168,7 +170,8 @@ export class MessagesPage {
   selector: 'app-admin',
   imports: [ReactiveFormsModule],
   template: `
-    <h1>Administración</h1>
+    <p class="page-kicker">Catálogo</p>
+    <h1 class="page-title">Administración</h1>
     @if (reports(); as item) {
       <div class="stats">
         <article class="stat"><b>{{ item['users'] }}</b> personas</article>

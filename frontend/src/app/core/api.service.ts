@@ -92,7 +92,7 @@ export interface CareerDetail extends Career { specializations: Named[]; faculti
 export interface Page<T> { content: T[]; totalElements: number; }
 export interface TemplateCard {
   templateId: string; code: string; name: string; description: string; layout: string; variantName: string;
-  sections: SectionSchema[]; competencies: string[]; examples: string[]; disclaimer?: string;
+  sections: SectionSchema[]; competencies: string[]; examples: string[]; disclaimer?: string; theme?: Theme;
 }
 export interface SectionSchema { key: string; title: string; component: string; variant: string; hint: string; }
 export interface ProfileResponse { firstName: string; lastName: string; email: string; onboardingCompleted: boolean; personal: Personal; professional: Professional; academic: Academic | null; }
