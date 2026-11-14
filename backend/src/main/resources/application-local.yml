@@ -1,0 +1,13 @@
+app:
+  jwt:
+    secret: local-only-secret-change-me-please-32b
+  mail:
+    from: "Portfolio Hub <no-reply@portfoliohub.local>"
+    expose-dev-link: true
+  admin:
+    email: ${APP_ADMIN_EMAIL:admin@portfoliohub.local}
+    password: ${APP_ADMIN_PASSWORD:ChangeMe-Admin-17}
+
+logging:
+  level:
+    com.portfoliohub: INFO

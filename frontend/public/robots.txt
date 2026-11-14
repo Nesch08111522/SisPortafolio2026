@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /admin
+
+Sitemap: /api/v1/public/sitemap.xml

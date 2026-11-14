@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: portfoliohub
+      POSTGRES_USER: portfolio
+      POSTGRES_PASSWORD: portfolio
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portfolio -d portfoliohub"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/portfoliohub
+      SPRING_DATASOURCE_USERNAME: portfolio
+      SPRING_DATASOURCE_PASSWORD: portfolio
+      JWT_SECRET: cambia-este-secreto-de-produccion-32b
+      APP_PUBLIC_BASE_URL: http://localhost:4200
+      APP_CORS_ORIGINS: http://localhost:4200
+      APP_STORAGE_PATH: /data/storage
+    ports:
+      - "8080:8080"
+    volumes:
+      - uploads:/data/storage
+
+volumes:
+  pgdata:
+  uploads:

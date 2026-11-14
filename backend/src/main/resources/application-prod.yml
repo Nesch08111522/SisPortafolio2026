@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:?Configura SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME:?Configura SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD:?Configura SPRING_DATASOURCE_PASSWORD}
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+app:
+  public-base-url: ${APP_PUBLIC_BASE_URL:?Configura APP_PUBLIC_BASE_URL}
+  trust-proxy: true
+  jwt:
+    secret: ${JWT_SECRET:?Configura JWT_SECRET}
+  mail:
+    from: ${MAIL_FROM:Portfolio Hub <no-reply@portfoliohub.local>}
+    expose-dev-link: false
+  cors:
+    origins: ${APP_CORS_ORIGINS:?Configura APP_CORS_ORIGINS}
+  admin:
+    email: ${APP_ADMIN_EMAIL:}
+    password: ${APP_ADMIN_PASSWORD:}
+  storage:
+    path: ${APP_STORAGE_PATH:/data/storage}

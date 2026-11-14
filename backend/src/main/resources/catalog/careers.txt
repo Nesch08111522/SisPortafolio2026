@@ -1,0 +1,111 @@
+# code|nombre|english|isced|facultades separadas por coma|especializaciones separadas por ;
+ING-SIS|Ingeniería de Sistemas|Systems Engineering|0613|ENG|Desarrollo de software;Gestión de tecnologías de información;Ciberseguridad
+ING-INF|Ingeniería Informática|Computer Engineering|0613|ENG|Ingeniería de software;Redes;Inteligencia artificial
+ING-SW|Ingeniería de Software|Software Engineering|0613|ENG|Arquitectura de software;Calidad de software;Desarrollo web y móvil
+CIEN-DATOS|Ciencia de Datos|Data Science|0613|ENG,MATH|Análisis de datos;Aprendizaje automático;Ingeniería de datos
+INTEL-ART|Inteligencia Artificial|Artificial Intelligence|0619|ENG|Aprendizaje automático;Procesamiento de lenguaje;Visión por computador
+CIBERSEG|Ciberseguridad|Cybersecurity|0613|ENG|Seguridad ofensiva formativa;Defensa de sistemas;Gobierno de seguridad
+COMP-CIEN|Ciencias de la Computación|Computer Science|0613|ENG,EXACT|Algoritmos;Sistemas;Computación teórica
+ING-REDES|Ingeniería de Redes y Comunicaciones|Network Engineering|0612|ENG|Redes;Infraestructura;Seguridad de redes
+DEV-VIDEO|Desarrollo de Videojuegos|Game Development|0613|ENG,ART|Programación de juegos;Diseño de juego;Arte para videojuegos
+ING-CIVIL|Ingeniería Civil|Civil Engineering|0732|ENG|Estructuras;Transportes;Gestión de la construcción
+ING-IND|Ingeniería Industrial|Industrial Engineering|0719|ENG,BUS|Operaciones;Calidad;Logística
+ING-ELEC|Ingeniería Electrónica|Electronic Engineering|0714|ENG|Electrónica;Automatización;Sistemas embebidos
+ING-MEC|Ingeniería Mecánica|Mechanical Engineering|0715|ENG|Diseño mecánico;Energía;Manufactura
+ING-ELECTR|Ingeniería Eléctrica|Electrical Engineering|0713|ENG|Potencia;Control;Instalaciones eléctricas
+ING-TEL|Ingeniería de Telecomunicaciones|Telecommunications Engineering|0714|ENG|Redes móviles;Sistemas de comunicación;Radiofrecuencia
+ING-AMB|Ingeniería Ambiental|Environmental Engineering|0712|ENG,ENV|Gestión ambiental;Agua y saneamiento;Evaluación de impacto
+ING-QUIM|Ingeniería Química|Chemical Engineering|0711|ENG|Procesos;Energía;Materiales
+ING-MIN|Ingeniería de Minas|Mining Engineering|0722|ENG|Operaciones mineras;Geomecánica;Gestión ambiental minera
+ING-ALI|Ingeniería de Alimentos|Food Engineering|0721|ENG,AGRI|Procesos alimentarios;Calidad;Desarrollo de productos
+ING-BIO|Ingeniería Biomédica|Biomedical Engineering|0714|ENG,SALUD|Dispositivos;Señales biomédicas;Informática en salud
+ING-GEO|Ingeniería Geológica|Geological Engineering|0532|ENG,NAT|Geotecnia;Recursos;Riesgos geológicos
+ING-MET|Ingeniería Metalúrgica|Metallurgical Engineering|0715|ENG|Metalurgia extractiva;Materiales;Procesos
+ING-MECAT|Ingeniería Mecatrónica|Mechatronics Engineering|0714|ENG|Robótica;Control;Automatización
+ING-AERO|Ingeniería Aeronáutica|Aeronautical Engineering|0716|ENG|Aerodinámica;Mantenimiento aeronáutico;Diseño
+MED-HUM|Medicina Humana|Human Medicine|0912|MED,SALUD|Medicina interna;Cirugía;Pediatría;Salud pública
+ENFER|Enfermería|Nursing|0913|SALUD|Enfermería comunitaria;Enfermería clínica;Gestión del cuidado
+ODONT|Odontología|Dentistry|0911|SALUD|Odontología restauradora;Ortodoncia;Salud pública estomatológica
+OBSTET|Obstetricia|Obstetrics|0913|SALUD|Salud materna;Salud reproductiva;Atención primaria
+NUTRI|Nutrición|Nutrition|0915|SALUD|Nutrición clínica;Nutrición comunitaria;Nutrición deportiva
+PSICO|Psicología|Psychology|0313|SALUD,SOC|Psicología educativa;Psicología organizacional;Investigación psicológica
+FARMA|Farmacia y Bioquímica|Pharmacy and Biochemistry|0916|SALUD|Farmacia clínica;Laboratorio;Investigación farmacéutica
+TEC-MED|Tecnología Médica|Medical Technology|0914|SALUD|Laboratorio clínico;Radiología;Terapia
+TER-FIS|Terapia Física y Rehabilitación|Physical Therapy|0915|SALUD|Rehabilitación musculoesquelética;Rehabilitación neurológica;Salud comunitaria
+FONO|Fonoaudiología|Speech Therapy|0915|SALUD|Lenguaje;Voz;Audición
+OPTOM|Optometría|Optometry|0914|SALUD|Optometría clínica;Contactología;Salud visual comunitaria
+SALUD-PUB|Salud Pública|Public Health|0988|SALUD,MED|Epidemiología;Gestión sanitaria;Promoción de la salud
+BIOLOG|Biología|Biology|0511|BIO|Biología celular;Ecología;Zoología
+MICRO|Microbiología|Microbiology|0511|BIO|Microbiología clínica;Microbiología ambiental;Biotecnología microbiana
+BIOTEC|Biotecnología|Biotechnology|0512|BIO|Biotecnología molecular;Bioprocesos;Bioinformática
+BIOQ|Bioquímica|Biochemistry|0512|BIO,EXACT|Bioquímica clínica;Bioquímica de proteínas;Investigación
+GENET|Genética|Genetics|0511|BIO|Genética molecular;Genética humana;Genómica
+ECOL|Ecología|Ecology|0521|BIO,ENV|Ecología de comunidades;Conservación;Ecología urbana
+BIO-MAR|Biología Marina|Marine Biology|0511|BIO|Ecología marina;Recursos hidrobiológicos;Conservación
+QUIM|Química|Chemistry|0531|EXACT,NAT|Química analítica;Química orgánica;Química de materiales
+FISICA|Física|Physics|0533|EXACT|Física teórica;Física aplicada;Física médica
+GEOLOG|Geología|Geology|0532|NAT|Geología estructural;Geología ambiental;Recursos minerales
+CIEN-AMB|Ciencias Ambientales|Environmental Science|0521|ENV,NAT|Gestión ambiental;Cambio climático;Conservación
+AGRON|Agronomía|Agronomy|0811|AGRI|Producción agrícola;Suelos;Protección de cultivos
+ING-AGR|Ingeniería Agronómica|Agronomic Engineering|0811|AGRI,ENG|Producción;Riego;Agroindustria
+ZOOTEC|Zootecnia|Animal Science|0811|AGRI,VET|Producción animal;Nutrición animal;Mejoramiento
+FOREST|Ingeniería Forestal|Forestry|0821|AGRI,ENV|Manejo forestal;Conservación;Industria forestal
+VET-MED|Medicina Veterinaria|Veterinary Medicine|0841|VET|Animales de compañía;Producción animal;Salud pública veterinaria
+DERECHO|Derecho|Law|0421|LAW|Derecho civil;Derecho penal;Derecho constitucional;Derecho laboral
+SOCIO|Sociología|Sociology|0314|SOC|Sociología urbana;Métodos de investigación;Sociología política
+ANTRO|Antropología|Anthropology|0314|SOC,HUM|Antropología social;Arqueología;Antropología visual
+TRAB-SOC|Trabajo Social|Social Work|0923|SOC|Intervención comunitaria;Familia;Políticas sociales
+CIEN-POL|Ciencia Política|Political Science|0312|POL,SOC|Gobierno;Políticas públicas;Análisis político
+REL-INT|Relaciones Internacionales|International Relations|0312|IR,POL|Cooperación internacional;Política exterior;Estudios de seguridad
+HIST|Historia|History|0222|HUM|Historia contemporánea;Historia del Perú;Archivos
+FILO|Filosofía|Philosophy|0223|HUM|Ética;Filosofía política;Epistemología
+LING|Lingüística|Linguistics|0232|HUM|Lingüística aplicada;Sociolingüística;Documentación lingüística
+LIT|Literatura|Literature|0232|HUM|Literatura latinoamericana;Estudios culturales;Edición
+ARQUEO|Arqueología|Archaeology|0222|HUM,SOC|Arqueología andina;Gestión del patrimonio;Arqueometría
+GEOG|Geografía|Geography|0314|SOC,NAT|Geografía humana;Sistemas de información geográfica;Ordenamiento territorial
+ADMIN|Administración|Business Administration|0413|BUS|Gestión estratégica;Emprendimiento;Operaciones
+ECON|Economía|Economics|0311|ECON|Economía aplicada;Economía pública;Métodos cuantitativos
+CONT|Contabilidad|Accounting|0411|BUS,ECON|Contabilidad financiera;Auditoría;Tributación
+FINAN|Finanzas|Finance|0412|BUS,ECON|Finanzas corporativas;Mercados;Análisis financiero
+MARKET|Marketing|Marketing|0414|BUS|Marketing digital;Investigación de mercados;Marca
+NEG-INT|Negocios Internacionales|International Business|0413|BUS,IR|Comercio exterior;Negociación intercultural;Logística internacional
+RRHH|Gestión de Recursos Humanos|Human Resource Management|0413|BUS|Gestión del talento;Comportamiento organizacional;Relaciones laborales
+COM-INT|Comercio Internacional|International Trade|0413|BUS|Aduanas;Logística;Inteligencia comercial
+AUDIT|Auditoría|Auditing|0411|BUS,ECON|Auditoría financiera;Control interno;Auditoría de sistemas
+ING-COM|Ingeniería Comercial|Commercial Engineering|0413|BUS,ENG|Gestión comercial;Análisis de datos de negocio;Estrategia
+GEST-PUB|Gestión Pública|Public Management|0413|BUS,POL|Políticas públicas;Gestión de proyectos públicos;Gobierno digital
+LOGIST|Logística|Logistics|1041|BUS|Cadena de suministro;Operaciones;Comercio
+EDU-INI|Educación Inicial|Early Childhood Education|0112|EDU|Desarrollo infantil;Didáctica;Gestión del aula
+EDU-PRI|Educación Primaria|Primary Education|0113|EDU|Didáctica;Comunicación y matemática;Gestión escolar
+EDU-SEC|Educación Secundaria|Secondary Education|0114|EDU|Especialidad curricular;Didáctica;Orientación
+EDU-ESP|Educación Especial|Special Education|0114|EDU|Inclusión;Intervención educativa;Apoyos
+EDU-FIS|Educación Física|Physical Education|0114|EDU,SPORT|Actividad física escolar;Entrenamiento formativo;Salud
+EDU-ART|Educación Artística|Arts Education|0114|EDU,ART|Pedagogía artística;Didáctica de las artes;Mediación cultural
+PEDAG|Pedagogía|Pedagogy|0111|EDU|Teoría educativa;Currículo;Investigación educativa
+PSICOPED|Psicopedagogía|Educational Psychology|0111|EDU|Aprendizaje;Orientación;Dificultades de aprendizaje
+ARQ|Arquitectura|Architecture|0731|ARCH|Diseño arquitectónico;Urbanismo;Tecnología de la construcción
+URB|Urbanismo|Urban Planning|0731|ARCH|Diseño urbano;Movilidad;Planificación territorial
+DIS-GRAF|Diseño Gráfico|Graphic Design|0211|ART|Identidad visual;Editorial;Diseño digital
+DIS-IND|Diseño Industrial|Industrial Design|0212|ART|Producto;Materiales;Diseño sustentable
+DIS-INT|Diseño de Interiores|Interior Design|0212|ART,ARCH|Espacios residenciales;Espacios comerciales;Iluminación
+DIS-MOD|Diseño de Modas|Fashion Design|0212|ART|Indumentaria;Patronaje;Gestión de moda
+DIS-UX|Diseño de Experiencia de Usuario|User Experience Design|0211|ART,ENG|Investigación de usuarios;Interfaz;Diseño de servicios
+ART-VIS|Artes Visuales|Visual Arts|0213|ART|Pintura;Arte contemporáneo;Gestión cultural
+ART-PLAS|Artes Plásticas|Fine Arts|0213|ART|Dibujo;Escultura;Grabado
+MUSICA|Música|Music|0215|ART|Interpretación;Composición;Educación musical
+TEATRO|Teatro|Theatre|0215|ART|Actuación;Dirección;Dramaturgia
+COM-AUD|Comunicación Audiovisual|Audiovisual Communication|0211|COMM,ART|Realización;Guion;Postproducción
+PERIOD|Periodismo|Journalism|0321|COMM|Periodismo digital;Investigación periodística;Reportería
+PUBLIC|Publicidad|Advertising|0414|COMM,BUS|Estrategia creativa;Planificación de medios;Contenido de marca
+COM-SOC|Comunicación Social|Social Communication|0321|COMM|Comunicación organizacional;Comunicación para el desarrollo;Medios
+CINE|Cine y Medios Audiovisuales|Film|0211|COMM,ART|Dirección;Fotografía;Montaje
+FOTO|Fotografía|Photography|0211|ART|Fotografía documental;Fotografía de autor;Edición
+TUR|Turismo|Tourism|1015|TOUR|Gestión de destinos;Turismo cultural;Planificación turística
+HOTEL|Hotelería|Hospitality|1013|TOUR|Operaciones hoteleras;Servicio;Gestión de alojamiento
+GASTR|Gastronomía|Gastronomy|1013|TOUR|Cocina;Gestión de alimentos y bebidas;Pastelería
+DEP-CIEN|Ciencias del Deporte|Sport Science|1014|SPORT|Entrenamiento;Actividad física y salud;Gestión deportiva
+ENTREN|Entrenamiento Deportivo|Sports Coaching|1014|SPORT|Preparación física;Deporte formativo;Análisis del rendimiento
+MAT|Matemáticas|Mathematics|0541|MATH,EXACT|Matemática pura;Matemática aplicada;Enseñanza de la matemática
+ESTAD|Estadística|Statistics|0542|MATH|Estadística aplicada;Ciencia de datos estadística;Muestreo
+MAT-APL|Matemática Aplicada|Applied Mathematics|0541|MATH|Modelamiento;Optimización;Computación científica
+ACTU|Actuaría|Actuarial Science|0542|MATH,ECON|Riesgo;Seguros;Modelos actuariales

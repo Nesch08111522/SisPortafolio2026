@@ -1,0 +1,17 @@
+.idea/
+.vscode/
+*.iml
+.env
+.env.*
+!.env.example
+data/
+**/target/
+**/node_modules/
+**/dist/
+**/.angular/
+**/.npm-cache/
+*.log
+npm-debug.log*
+coverage/
+playwright-report/
+test-results/

@@ -1,0 +1,15 @@
+app:
+  jwt:
+    secret: test-secret-key-must-be-at-least-32b
+  mail:
+    from: "Portfolio Hub <no-reply@portfoliohub.local>"
+    expose-dev-link: true
+  admin:
+    email: ""
+    password: ""
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
