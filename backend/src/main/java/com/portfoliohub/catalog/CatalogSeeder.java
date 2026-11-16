@@ -140,9 +140,7 @@ public class CatalogSeeder implements ApplicationRunner {
         if (careers.count() == 0) {
             seedCareers();
         }
-        if (templates.count() == 0) {
-            seedTemplates();
-        }
+        seedTemplates();
         generateMissingConfigs();
         releaseGeneratedPalettes();
         seedAdmin();
@@ -464,10 +462,20 @@ public class CatalogSeeder implements ApplicationRunner {
                 new TemplateSeed("executive", "Ejecutivo", "Banda oscura, datos concretos y lectura rápida.", "executive", theme("#B45309", "#1C1915", "#F6F5F2", "#FFFFFF", "#1C1915", "#5F5A52", "Cormorant Garamond", "Manrope", "light", "8", "solid")),
                 new TemplateSeed("experimental", "Experimental", "Numeración visible y composición asimétrica.", "experimental", theme("#4338CA", "#F97316", "#F8F7FF", "#FFFFFF", "#17141F", "#5C5870", "Space Grotesk", "Outfit", "light", "0", "outline")),
                 new TemplateSeed("dark", "Elegante oscuro", "Fondo profundo, texto claro y bordes finos.", "dark", theme("#D6B06A", "#F3E7D3", "#121417", "#1C1F24", "#F6F1E8", "#B7B1A6", "Cormorant Garamond", "Outfit", "dark", "12", "outline")),
-                new TemplateSeed("premium", "Premium contemporáneo", "Portada amplia y secciones con mucho aire.", "premium", theme("#0F5C45", "#1C1915", "#F3EFE7", "#FFFcf8", "#1C1915", "#5E584E", "Fraunces", "Manrope", "light", "18", "solid"))
+                new TemplateSeed("premium", "Premium contemporáneo", "Portada amplia y secciones con mucho aire.", "premium", theme("#0F5C45", "#1C1915", "#F3EFE7", "#FFFcf8", "#1C1915", "#5E584E", "Fraunces", "Manrope", "light", "18", "solid")),
+                new TemplateSeed("studio", "Estudio de marca", "El nombre ocupa una columna y el relato la otra, como un estudio.", "studio", theme("#111111", "#E11D48", "#F6F4EF", "#FFFFFF", "#161616", "#5C5852", "Fraunces", "Manrope", "light", "0", "square")),
+                new TemplateSeed("exhibit", "Sala de exposición", "Marcos amplios para las piezas, al modo de una galería.", "exhibit", theme("#1C1915", "#A16207", "#F3EFE6", "#FFFcf8", "#1C1915", "#5E584E", "Cormorant Garamond", "Outfit", "light", "0", "outline")),
+                new TemplateSeed("interior", "Proyecto de interiores", "Portada a sangre y ficha del espacio.", "interior", theme("#3F3A34", "#D6C4A8", "#EFE8DC", "#F7F3EC", "#241F1A", "#6B6258", "Libre Baskerville", "Source Sans 3", "light", "2", "solid")),
+                new TemplateSeed("screen", "Retrato cinematográfico", "El nombre se lee sobre una banda oscura.", "screen", theme("#F4E7C5", "#8B1E3F", "#101014", "#17171C", "#F6F1E8", "#C8C0B4", "Cormorant Garamond", "Outfit", "dark", "0", "outline")),
+                new TemplateSeed("fashion", "Editorial de moda", "Tipografía alta y las piezas en una franja.", "fashion", theme("#111111", "#F5F5F4", "#F7F6F3", "#FFFFFF", "#111111", "#6B6760", "Newsreader", "Manrope", "light", "0", "square")),
+                new TemplateSeed("gazette", "Diario de investigación", "Columnas y filetes, con el ritmo de un periódico.", "gazette", theme("#1A2744", "#9F1239", "#F4F1E8", "#FFFcf6", "#1A1A1A", "#4B5563", "Libre Baskerville", "Source Serif 4", "light", "0", "square"))
         );
         int order = 1;
         for (TemplateSeed seed : seeds) {
+            if (templates.findByCode(seed.code()).isPresent()) {
+                order++;
+                continue;
+            }
             TemplateDefinition template = new TemplateDefinition();
             template.setCode(seed.code());
             template.setName(seed.name());
@@ -499,22 +507,23 @@ public class CatalogSeeder implements ApplicationRunner {
 
     private void generateMissingConfigs() {
         List<TemplateDefinition> templateList = templates.findByActiveTrueOrderBySortOrderAsc();
-        if (!configs.existsByCareerIdIsNull()) {
-            Blueprint general = engine.resolve(null, null);
-            int order = 1;
-            for (TemplateDefinition template : templateList) {
-                saveConfig(null, "Perfil profesional", template, general, order++);
+        Blueprint general = engine.resolve(null, null);
+        int generalOrder = 1;
+        for (TemplateDefinition template : templateList) {
+            if (configs.findByCareerIdIsNullAndTemplateId(template.getId()).isEmpty()) {
+                saveConfig(null, "Perfil profesional", template, general, generalOrder);
             }
+            generalOrder++;
         }
         for (Career career : careers.findAll()) {
-            if (configs.existsByCareerId(career.getId())) {
-                continue;
-            }
             String facultyCode = career.getFaculties().stream().map(Faculty::getCode).findFirst().orElse(null);
             Blueprint blueprint = engine.resolve(career.getCode(), facultyCode);
             int order = 1;
             for (TemplateDefinition template : templateList) {
-                saveConfig(career.getId(), career.getName(), template, blueprint, order++);
+                if (configs.findByCareerIdAndTemplateId(career.getId(), template.getId()).isEmpty()) {
+                    saveConfig(career.getId(), career.getName(), template, blueprint, order);
+                }
+                order++;
             }
         }
     }

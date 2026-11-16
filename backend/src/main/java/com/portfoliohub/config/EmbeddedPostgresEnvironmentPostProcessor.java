@@ -25,7 +25,7 @@ public class EmbeddedPostgresEnvironmentPostProcessor implements EnvironmentPost
                 .setPort(0)
                 .setDataDirectory(dataDirectory)
                 .setCleanDataDirectory(false)
-                .setPGStartupWait(Duration.ofSeconds(40))
+                .setPGStartupWait(Duration.ofSeconds(60))
                 .start();
     }
 
@@ -37,14 +37,17 @@ public class EmbeddedPostgresEnvironmentPostProcessor implements EnvironmentPost
     @Override
     public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
         String profiles = System.getenv().getOrDefault("SPRING_PROFILES_ACTIVE", "");
-        String configuredUrl = System.getenv("SPRING_DATASOURCE_URL");
+        String configuredUrl = environment.getProperty("spring.datasource.url");
+        if (configuredUrl == null || configuredUrl.isBlank()) {
+            configuredUrl = System.getenv("SPRING_DATASOURCE_URL");
+        }
         if (profiles.contains("prod") || (configuredUrl != null && !configuredUrl.isBlank())) {
             return;
         }
         synchronized (EmbeddedPostgresEnvironmentPostProcessor.class) {
             if (postgres == null) {
                 Exception lastFailure = null;
-                for (String folder : new String[] {"pg-app", "pg", "postgres-local", "postgres"}) {
+                for (String folder : new String[] {"pg-live", "pg-app", "pg", "postgres-local", "postgres"}) {
                     try {
                         postgres = open(Path.of("data", folder));
                         lastFailure = null;

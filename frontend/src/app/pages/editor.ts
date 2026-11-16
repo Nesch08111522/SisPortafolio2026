@@ -12,8 +12,8 @@ import { Steps } from './steps';
   template: `
     <app-steps />
     <p class="page-kicker">Composiciones</p>
-    <h1 class="page-title">Diez diseños para tu carrera</h1>
-    <p class="note">Son diez familias visuales con la estructura de tu carrera. Cambiar de diseño conserva el texto de las secciones que comparten clave.</p>
+    <h1 class="page-title">Diez diseños{{ career() ? ' para ' + career() : '' }}</h1>
+    <p class="note">{{ familyNote() }} Cada sitio usa una sola composición. Cambiar de diseño conserva el texto de las secciones que comparten clave.</p>
     @if (message()) { <p [class.error]="failed()">{{ message() }}</p> }
     <div class="design-grid">
       @for (item of designs(); track item.templateId) {
@@ -52,17 +52,58 @@ export class DesignsPage {
   readonly preview = signal<PortfolioView | null>(null);
   readonly message = signal('');
   readonly failed = signal(false);
+  readonly career = signal('');
   private readonly ranks: Record<string, string> = {
-    minimal: '01 · Sencillo', corporate: '02 · Corporativo', tech: '03 · Tecnológico', editorial: '04 · Editorial',
-    creative: '05 · Creativo', academic: '06 · Académico', executive: '07 · Ejecutivo', experimental: '08 · Experimental',
-    dark: '09 · Oscuro', premium: '10 · Profesional'
+    minimal: 'CV investigador', corporate: 'CV de negocios', tech: 'Portafolio tecnológico', editorial: 'Estudio editorial',
+    creative: 'CV creativo', academic: 'CV académico', executive: 'CV profesional', experimental: 'Portafolio contemporáneo',
+    dark: 'Sesión fotográfica', premium: 'Portafolio de marca',
+    studio: 'Estudio de marca', exhibit: 'Sala de exposición', interior: 'Proyecto de interiores',
+    screen: 'Retrato cinematográfico', fashion: 'Editorial de moda', gazette: 'Diario de investigación'
   };
   constructor() {
     this.api.preview().subscribe({ next: (view) => this.preview.set(view), error: () => undefined });
     this.api.profile().subscribe({
-      next: (profile) => this.api.recommended(profile.academic?.careerId).subscribe((items) => this.designs.set(items)),
+      next: (profile) => {
+        const name = profile.academic?.careerName ?? '';
+        this.career.set(name);
+        this.api.recommended(profile.academic?.careerId).subscribe((items) => this.designs.set(this.forCareer(items, name)));
+      },
       error: () => this.designs.set([])
     });
+  }
+  familyNote(): string {
+    const name = this.career().toLowerCase();
+    if (/medic|salud|enferm|odonto|nutri|psicol|farmac|biolog|veterin/.test(name)) return 'Para ciencias de la salud se priorizan composiciones clínicas, editoriales y de investigación.';
+    if (/derech|legal|jurid/.test(name)) return 'Para derecho se priorizan composiciones editoriales, ejecutivas y de archivo.';
+    if (/arquitect|diseñ|diseñ|interior|moda|arte|urban/.test(name)) return 'Para diseño y arquitectura se priorizan sala, interiores, moda y estudio.';
+    if (/ingenier|sistem|software|comput|datos|industrial/.test(name)) return 'Para ingeniería y tecnología se priorizan composiciones técnicas, de producto y de tablero.';
+    if (/admin|negoci|econom|market|contab|gesti/.test(name)) return 'Para administración se priorizan composiciones de negocio, marca y dirección.';
+    return 'Elige una carrera para ordenar las diez composiciones según tu disciplina.';
+  }
+  private forCareer(items: TemplateCard[], name: string): TemplateCard[] {
+    const text = name.toLowerCase();
+    const order = /medic|salud|enferm|odonto|nutri|psicol|farmac|biolog|veterin/.test(text)
+      ? ['academic', 'gazette', 'editorial', 'interior', 'exhibit', 'premium', 'executive', 'minimal', 'corporate', 'studio']
+      : /derech|legal|jurid/.test(text)
+        ? ['editorial', 'gazette', 'executive', 'academic', 'corporate', 'premium', 'minimal', 'exhibit', 'studio', 'interior']
+        : /arquitect|diseñ|disen|interior|moda|arte|urban/.test(text)
+          ? ['exhibit', 'interior', 'fashion', 'creative', 'studio', 'screen', 'premium', 'editorial', 'experimental', 'dark']
+          : /ingenier|sistem|software|comput|datos|industrial/.test(text)
+            ? ['tech', 'screen', 'experimental', 'corporate', 'studio', 'premium', 'executive', 'dark', 'minimal', 'gazette']
+            : /admin|negoci|econom|market|contab|gesti/.test(text)
+              ? ['corporate', 'executive', 'premium', 'studio', 'tech', 'minimal', 'editorial', 'gazette', 'academic', 'exhibit']
+              : ['minimal', 'corporate', 'editorial', 'academic', 'executive', 'tech', 'premium', 'studio', 'exhibit', 'gazette'];
+    const ranked = [...items].sort((a, b) => {
+      const left = order.indexOf(a.layout);
+      const right = order.indexOf(b.layout);
+      return (left < 0 ? 99 : left) - (right < 0 ? 99 : right);
+    });
+    const seen = new Set<string>();
+    return ranked.filter((item) => {
+      if (seen.has(item.layout)) return false;
+      seen.add(item.layout);
+      return order.includes(item.layout);
+    }).slice(0, 10);
   }
   rank(layout: string): string { return this.ranks[layout] ?? layout; }
   pin(item: TemplateCard): void {

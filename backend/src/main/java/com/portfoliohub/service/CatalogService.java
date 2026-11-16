@@ -20,6 +20,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +152,7 @@ public class CatalogService {
         if (countryId == null) {
             return List.of();
         }
-        return cities.search(countryId, regionId, provinceId, q == null || q.isBlank() ? null : q.trim());
+        return cities.search(countryId, regionId, provinceId, q == null ? "" : q.trim());
     }
 
     public List<com.portfoliohub.domain.District> districts(UUID cityId) {
@@ -178,5 +190,188 @@ public class CatalogService {
             view.put("theme", template == null ? null : template.getThemeDefaults());
             return view;
         }).toList();
+    }
+
+    public List<Map<String, String>> worldUniversities(String country, String name) {
+        String query = name == null ? "" : name.trim();
+        String plainCountry = Normalizer.normalize(country == null ? "" : country, Normalizer.Form.NFD).replaceAll("\\p{M}", "");
+        if (query.length() < 2 || plainCountry.isBlank()) {
+            return List.of();
+        }
+        try {
+            String url = "http://universities.hipolabs.com/search?country="
+                    + URLEncoder.encode(plainCountry, StandardCharsets.UTF_8)
+                    + "&name=" + URLEncoder.encode(query, StandardCharsets.UTF_8);
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(6)).GET().build();
+            HttpResponse<String> response = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(4)).build()
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                return List.of();
+            }
+            JsonNode array = new ObjectMapper().readTree(response.body());
+            List<Map<String, String>> rows = new ArrayList<>();
+            if (array.isArray()) {
+                for (JsonNode node : array) {
+                    if (rows.size() >= 12) {
+                        break;
+                    }
+                    String university = node.path("name").asText("");
+                    if (!university.isBlank()) {
+                        rows.add(Map.of("name", university, "country", node.path("country").asText(plainCountry)));
+                    }
+                }
+            }
+            return rows;
+        } catch (Exception exception) {
+            return List.of();
+        }
+    }
+
+    public Map<String, Object> worldPlaces(String country, String region) {
+        String plainCountry = plain(country);
+        Map<String, Object> body = new LinkedHashMap<>();
+        List<Map<String, String>> regions = new ArrayList<>();
+        JsonNode states = placesJson(plainCountry, country);
+        if (states != null) {
+            for (JsonNode state : states.path("data").path("states")) {
+                String name = state.path("name").asText("").trim();
+                if (!name.isBlank()) {
+                    regions.add(Map.of("id", name, "name", name, "hint", state.path("state_code").asText("Región")));
+                }
+            }
+        }
+        body.put("regions", regions);
+        String regionName = region == null ? "" : region.trim();
+        if (regionName.isBlank()) {
+            body.put("provinces", List.of());
+            body.put("cities", List.of());
+            body.put("districts", List.of());
+            return body;
+        }
+        JsonNode citiesNode = readJson("https://countriesnow.space/api/v0.1/countries/state/cities/q?country="
+                + encoded(plainCountry) + "&state=" + encoded(regionName));
+        List<String> names = new ArrayList<>();
+        if (citiesNode != null && citiesNode.path("data").isArray()) {
+            for (JsonNode city : citiesNode.path("data")) {
+                String name = city.asText("").trim();
+                if (!name.isBlank() && names.size() < 180) {
+                    names.add(name);
+                }
+            }
+        }
+        List<Map<String, String>> provinces = new ArrayList<>();
+        List<Map<String, String>> cities = new ArrayList<>();
+        List<Map<String, String>> districts = new ArrayList<>();
+        for (String name : names) {
+            String kind = placeKind(name);
+            Map<String, String> row = Map.of("id", name, "name", displayPlace(name), "hint", kind);
+            if ("Provincia".equals(kind)) {
+                provinces.add(row);
+            } else if ("Distrito".equals(kind)) {
+                districts.add(row);
+            } else {
+                cities.add(row);
+            }
+        }
+        if (provinces.isEmpty()) {
+            provinces.addAll(named(names, "Localidad"));
+        }
+        if (cities.isEmpty()) {
+            cities.addAll(named(names, "Ciudad"));
+        }
+        if (districts.isEmpty()) {
+            districts.addAll(named(names, "Distrito o barrio"));
+        }
+        body.put("provinces", provinces);
+        body.put("cities", cities);
+        body.put("districts", districts);
+        return body;
+    }
+
+    public List<Map<String, String>> worldCareers(String kind, String query) {
+        String q = query == null ? "" : query.trim();
+        if (q.length() < 2) {
+            return List.of();
+        }
+        String wanted = kind == null ? "" : kind.trim().toLowerCase();
+        List<Map<String, String>> rows = new ArrayList<>();
+        if (!"technical".equals(wanted)) {
+            careers.search(null, q, PageRequest.of(0, 12)).forEach(career -> rows.add(Map.of(
+                    "id", career.getId().toString(),
+                    "name", career.getName(),
+                    "kind", "Universitaria",
+                    "hint", career.getIscedCode() == null || career.getIscedCode().isBlank() ? "Universitaria" : "Universitaria · ISCED " + career.getIscedCode()
+            )));
+        }
+        if (!"university".equals(wanted)) {
+            JsonNode root = readJson("https://ec.europa.eu/esco/api/search?language=es&type=occupation&limit=12&offset=0&text=" + encoded(q));
+            if (root != null) {
+                for (JsonNode node : root.path("_embedded").path("results")) {
+                    String title = node.path("title").asText("").trim();
+                    String code = node.path("code").asText("").trim();
+                    if (!title.isBlank()) {
+                        rows.add(Map.of("id", "esco:" + (code.isBlank() ? title : code), "name", title, "kind", "Técnica", "hint", code.isBlank() ? "Técnica" : "Técnica · " + code));
+                    }
+                }
+            }
+        }
+        return rows;
+    }
+
+    private JsonNode placesJson(String plainCountry, String country) {
+        JsonNode states = readJson("https://countriesnow.space/api/v0.1/countries/states/q?country=" + encoded(plainCountry));
+        if (states != null && states.path("data").path("states").size() > 0) {
+            return states;
+        }
+        String original = country == null ? "" : country.trim();
+        if (original.equals(plainCountry)) {
+            return states;
+        }
+        return readJson("https://countriesnow.space/api/v0.1/countries/states/q?country=" + encoded(original));
+    }
+
+    private JsonNode readJson(String url) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(8)).header("Accept", "application/json").GET().build();
+            HttpResponse<String> response = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(4)).build()
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                return null;
+            }
+            return new ObjectMapper().readTree(response.body());
+        } catch (Exception exception) {
+            return null;
+        }
+    }
+
+    private List<Map<String, String>> named(List<String> names, String hint) {
+        List<Map<String, String>> rows = new ArrayList<>();
+        for (String name : names) {
+            rows.add(Map.of("id", name, "name", displayPlace(name), "hint", hint));
+        }
+        return rows;
+    }
+
+    private String placeKind(String name) {
+        String folded = plain(name).toLowerCase();
+        if (folded.startsWith("provincia") || folded.startsWith("province") || folded.startsWith("county") || folded.startsWith("municipio") || folded.startsWith("parroquia") || folded.startsWith("departamento")) {
+            return "Provincia";
+        }
+        if (folded.startsWith("distrito") || folded.startsWith("district") || folded.startsWith("barrio") || folded.startsWith("urb.") || folded.startsWith("urbanizacion") || folded.startsWith("asentamiento")) {
+            return "Distrito";
+        }
+        return "Ciudad";
+    }
+
+    private String displayPlace(String name) {
+        return name.replaceFirst("(?i)^(provincia de|province of|distrito de|district of)\\s+", "");
+    }
+
+    private String plain(String value) {
+        return Normalizer.normalize(value == null ? "" : value, Normalizer.Form.NFD).replaceAll("\\p{M}", "").trim();
+    }
+
+    private String encoded(String value) {
+        return URLEncoder.encode(value == null ? "" : value, StandardCharsets.UTF_8);
     }
 }

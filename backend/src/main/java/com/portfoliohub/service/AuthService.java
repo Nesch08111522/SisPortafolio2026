@@ -93,7 +93,7 @@ public class AuthService {
             throw ApiException.badRequest("TERMS_REQUIRED", "Debes aceptar los términos y condiciones.");
         }
         String country = command.countryCode() == null ? "" : command.countryCode().trim().toUpperCase(Locale.ROOT);
-        if (!country.matches("[A-Z]{2}") || countries.findByIso2IgnoreCase(country).isEmpty()) {
+        if (!country.isBlank() && (!country.matches("[A-Z]{2}") || countries.findByIso2IgnoreCase(country).isEmpty())) {
             throw ApiException.badRequest("INVALID_COUNTRY", "Selecciona un país de la lista.");
         }
         if (users.findByEmailIgnoreCase(email).isPresent()) {
@@ -104,7 +104,7 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(command.password()));
         user.setFirstName(requiredName(command.firstName(), "El nombre es obligatorio."));
         user.setLastName(requiredName(command.lastName(), "Los apellidos son obligatorios."));
-        user.setCountryCode(country);
+        user.setCountryCode(country.isBlank() ? null : country);
         user.setEmailVerified(true);
         user.setEnabled(true);
         user.setTermsAcceptedAt(Instant.now());

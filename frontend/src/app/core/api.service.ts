@@ -25,6 +25,15 @@ export class ApiService {
   }
   career(id: string) { return this.http.get<CareerDetail>(`${API}/catalog/careers/${id}`); }
   universities(q = '') { return this.http.get<Page<Named>>(`${API}/catalog/universities`, { params: { q, size: '20' } }); }
+  worldUniversities(country: string, name: string) {
+    return this.http.get<{ name: string; country: string }[]>(`${API}/catalog/world/universities`, { params: { country, name } });
+  }
+  worldPlaces(country: string, region = '') {
+    return this.http.get<WorldPlaces>(`${API}/catalog/world/places`, { params: { country, region } });
+  }
+  worldCareers(q: string, kind = '') {
+    return this.http.get<WorldCareer[]>(`${API}/catalog/world/careers`, { params: { q, kind } });
+  }
   recommended(careerId?: string) {
     const params = careerId ? new HttpParams().set('careerId', careerId) : undefined;
     return this.http.get<TemplateCard[]>(`${API}/catalog/templates/recommended`, { params });
@@ -86,6 +95,9 @@ export class ApiService {
 
 export interface Country { id: string; iso2: string; name: string; }
 export interface Named { id: string; name: string; }
+export interface PlaceOption { id: string; name: string; hint?: string; }
+export interface WorldPlaces { regions: PlaceOption[]; provinces: PlaceOption[]; cities: PlaceOption[]; districts: PlaceOption[]; }
+export interface WorldCareer { id: string; name: string; kind: string; hint?: string; }
 export interface Faculty { id: string; code: string; name: string; description: string; }
 export interface Career { id: string; code: string; name: string; nameEn: string; iscedCode: string; }
 export interface CareerDetail extends Career { specializations: Named[]; faculties: Faculty[]; description: string; }
@@ -105,10 +117,10 @@ export interface Professional {
   linkedin?: string; github?: string; gitlab?: string; behance?: string; dribbble?: string; orcid?: string; googleScholar?: string; website?: string;
 }
 export interface Academic {
-  universityId?: string; universityName?: string; facultyId?: string; careerId?: string; specializationId?: string; semester?: string;
+  universityId?: string; universityName?: string; facultyId?: string; careerId?: string; careerName?: string; careerKind?: string; specializationId?: string; semester?: string;
   admissionYear?: number; expectedGraduation?: string; status?: string; relevantCourses?: string; interests?: string; professionalGoals?: string; licenseDeclared: boolean;
 }
-export interface Dashboard { completion: number; recommendations: string[]; publicationStatus: string; slug?: string; publicUrl?: string; visits: number; projects: number; courses: number; certifications: number; }
+export interface Dashboard { completion: number; recommendations: string[]; publicationStatus: string; slug?: string; publicUrl?: string; visits: number; projects: number; courses: number; certifications: number; firstName?: string; lastName?: string; career?: string; location?: string; }
 export interface EditorState { portfolio: PortfolioSummary; sections: SectionState[]; versions: VersionItem[]; }
 export interface PortfolioSummary { id: string; title: string; slug?: string; status: string; templateId?: string; theme: Theme; version: number; bilingual: boolean; whatsappEnabled: boolean; showEmail: boolean; showPhone: boolean; analyticsEnabled: boolean; recruiterViewEnabled: boolean; showcaseOptIn: boolean; seoTitle?: string; seoDescription?: string; publicUrl?: string; }
 export interface Theme { accent?: string; accent2?: string; background?: string; surface?: string; text?: string; muted?: string; fontHeading?: string; fontBody?: string; mode?: string; radius?: string; buttonStyle?: string; animation?: string; }
@@ -121,7 +133,7 @@ export interface PortfolioView {
   publications: PublicationView[]; skills: SkillItem[]; seo: { title: string; description: string; canonicalUrl: string; jsonLd: unknown };
 }
 export interface PersonView { firstName: string; lastName: string; bio?: string; bioEn?: string; photoUrl?: string; location?: string; email?: string; phone?: string; links: { label: string; url: string }[]; }
-export interface EducationView { university?: string; career?: string; status?: string; semester?: string; interests?: string; goals?: string; }
+export interface EducationView { university?: string; faculty?: string; career?: string; courses?: string; status?: string; semester?: string; admissionYear?: number; expectedGraduation?: string; interests?: string; goals?: string; }
 export interface ProjectView { id: string; name: string; description?: string; descriptionEn?: string; category?: string; role?: string; results?: string; architectureNote?: string; links?: Record<string, string>; technologies: string[]; images: string[]; coverUrl?: string; }
 export interface CourseView { id: string; name: string; institution: string; status: string; hours: number; description: string; descriptionEn: string; }
 export interface CertView { id: string; name: string; issuer?: string; issuedOn?: string; description?: string; verificationNote: string; }

@@ -13,6 +13,7 @@ import com.portfoliohub.domain.CareerTemplateConfig;
 import com.portfoliohub.domain.Certification;
 import com.portfoliohub.domain.Course;
 import com.portfoliohub.domain.Experience;
+import com.portfoliohub.domain.Faculty;
 import com.portfoliohub.domain.PersonalProfile;
 import com.portfoliohub.domain.Portfolio;
 import com.portfoliohub.domain.PortfolioDomain;
@@ -40,6 +41,7 @@ import com.portfoliohub.repo.CountryRepository;
 import com.portfoliohub.repo.CourseRepository;
 import com.portfoliohub.repo.DistrictRepository;
 import com.portfoliohub.repo.ExperienceRepository;
+import com.portfoliohub.repo.FacultyRepository;
 import com.portfoliohub.repo.PersonalProfileRepository;
 import com.portfoliohub.repo.PortfolioDomainRepository;
 import com.portfoliohub.repo.PortfolioPublicationRepository;
@@ -97,6 +99,7 @@ public class PortfolioService {
     private final ProfessionalProfileRepository professionalProfiles;
     private final AcademicRecordRepository academicRecords;
     private final CareerRepository careers;
+    private final FacultyRepository faculties;
     private final ProjectRepository projects;
     private final ProjectTechnologyRepository technologies;
     private final ProjectImageRepository images;
@@ -130,6 +133,7 @@ public class PortfolioService {
             ProfessionalProfileRepository professionalProfiles,
             AcademicRecordRepository academicRecords,
             CareerRepository careers,
+            FacultyRepository faculties,
             ProjectRepository projects,
             ProjectTechnologyRepository technologies,
             ProjectImageRepository images,
@@ -162,6 +166,7 @@ public class PortfolioService {
         this.professionalProfiles = professionalProfiles;
         this.academicRecords = academicRecords;
         this.careers = careers;
+        this.faculties = faculties;
         this.projects = projects;
         this.technologies = technologies;
         this.images = images;
@@ -523,12 +528,13 @@ public class PortfolioService {
         } else {
             recommendations.add("Añade una fotografía profesional.");
         }
-        if (personal.getCityId() != null || personal.getCustomCity() != null) {
+        if (personal.getCityId() != null || personal.getCustomCity() != null || personal.getCustomDistrict() != null) {
             score += 10;
         } else {
             recommendations.add("Indica tu ciudad. Si no está en el catálogo, escríbela manualmente.");
         }
-        if (academic != null && academic.getCareerId() != null) {
+        boolean hasCareer = academic != null && (academic.getCareerId() != null || (academic.getCareerName() != null && !academic.getCareerName().isBlank()));
+        if (hasCareer) {
             score += 15;
         } else {
             recommendations.add("Selecciona tu carrera para recibir secciones especializadas.");
@@ -569,6 +575,12 @@ public class PortfolioService {
         body.put("courses", courses.findByUserIdOrderByCreatedAtDesc(userId).size());
         body.put("certifications", certifications.findByUserIdOrderByCreatedAtDesc(userId).size());
         body.put("updatedAt", portfolio.getUpdatedAt());
+        User user = users.findById(userId).orElseThrow();
+        Career career = academic != null && academic.getCareerId() != null ? careers.findById(academic.getCareerId()).orElse(null) : null;
+        body.put("firstName", user.getFirstName());
+        body.put("lastName", user.getLastName());
+        body.put("career", academic == null ? "" : (career != null ? career.getName() : academic.getCareerName()));
+        body.put("location", location(personal));
         return body;
     }
 
@@ -742,7 +754,10 @@ public class PortfolioService {
         body.put("projects", projectViews);
         body.put("courses", courses.findByUserIdOrderByCreatedAtDesc(user.getId()).stream().filter(item -> !hidden.contains(item.getId().toString())).map(this::courseView).toList());
         body.put("certifications", certifications.findByUserIdOrderByCreatedAtDesc(user.getId()).stream().filter(item -> !hidden.contains(item.getId().toString())).map(this::certificationView).toList());
-        body.put("experiences", experiences.findByUserIdOrderByStartDateDesc(user.getId()).stream().filter(item -> !hidden.contains(item.getId().toString())).toList());
+        body.put("experiences", experiences.findByUserIdOrderByStartDateDesc(user.getId()).stream()
+                .filter(item -> !hidden.contains(item.getId().toString()))
+                .map(this::experienceView)
+                .toList());
         body.put("publications", publicationItems.findByUserIdOrderByPublishedOnDesc(user.getId()).stream().filter(item -> !hidden.contains(item.getId().toString())).map(this::publicationView).toList());
         body.put("skills", skillViews(user.getId(), hidden));
         body.put("seo", seo(portfolio, user, personal));
@@ -794,7 +809,7 @@ public class PortfolioService {
         if (academic == null) {
             return null;
         }
-        String name = career == null ? null : career.getName();
+        String name = career != null ? career.getName() : academic.getCareerName();
         String label = Texts.academicLabel(academic.getStatus(), name, config != null && config.isStudentSafe(), academic.isLicenseDeclared());
         if (config != null && config.isStudentSafe() && (academic.getStatus() == com.portfoliohub.domain.AcademicStatus.TITULADO || academic.getStatus() == com.portfoliohub.domain.AcademicStatus.PROFESIONAL)) {
             return label + ". La habilitación profesional es una declaración de la persona usuaria; Portfolio Hub no la verifica.";
@@ -805,7 +820,9 @@ public class PortfolioService {
     private Map<String, Object> education(AcademicRecord academic, Career career) {
         Map<String, Object> view = new LinkedHashMap<>();
         view.put("university", academic.getUniversityName());
-        view.put("career", career == null ? null : career.getName());
+        view.put("faculty", academic.getFacultyId() == null ? null : faculties.findById(academic.getFacultyId()).map(Faculty::getName).orElse(null));
+        view.put("career", career != null ? career.getName() : academic.getCareerName());
+        view.put("courses", academic.getRelevantCourses());
         view.put("careerEn", career == null ? null : career.getNameEn());
         view.put("status", academic.getStatus());
         view.put("semester", academic.getSemester());
@@ -837,6 +854,17 @@ public class PortfolioService {
                 .filter(url -> url != null)
                 .toList());
         view.put("publicationStatus", project.getPublicationStatus());
+        return view;
+    }
+
+    private Map<String, Object> experienceView(Experience experience) {
+        Map<String, Object> view = new LinkedHashMap<>();
+        view.put("id", experience.getId());
+        view.put("title", experience.getTitle());
+        view.put("organization", experience.getOrganization());
+        view.put("kind", experience.getKind());
+        view.put("description", experience.getDescription());
+        view.put("descriptionEn", experience.getDescriptionEn());
         return view;
     }
 
@@ -927,6 +955,12 @@ public class PortfolioService {
         } else if (personal.getCustomDistrict() != null) {
             parts.add(personal.getCustomDistrict());
         }
+        if (personal.getCustomRegion() != null) {
+            parts.add(personal.getCustomRegion());
+        }
+        if (personal.getCustomProvince() != null) {
+            parts.add(personal.getCustomProvince());
+        }
         if (personal.getCityId() != null) {
             cities.findById(personal.getCityId()).ifPresent(item -> parts.add(item.getName()));
         } else if (personal.getCustomCity() != null) {
@@ -945,7 +979,7 @@ public class PortfolioService {
             missing.add("Necesitas una biografía de al menos 40 caracteres.");
         }
         AcademicRecord academic = academicRecords.findFirstByUserIdAndPrimaryRecordTrueOrderByUpdatedAtDesc(userId).orElse(null);
-        if (academic == null || academic.getCareerId() == null) {
+        if (academic == null || (academic.getCareerId() == null && (academic.getCareerName() == null || academic.getCareerName().isBlank()))) {
             missing.add("Selecciona tu carrera antes de publicar.");
         }
         boolean hasContent = !projects.findByUserIdOrderByCreatedAtDesc(userId).isEmpty()

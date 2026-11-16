@@ -7,7 +7,7 @@ import { PublicFolioPage } from './pages/public-folio';
 import { AdminPage, MessagesPage, PublishPage } from './pages/publish';
 import { Shell } from './pages/shell';
 import { DocumentsPage, StudioPage } from './pages/studio';
-import { Examples, Terms, Welcome } from './pages/welcome';
+import { Cookies, Examples, Privacy, Terms, Welcome } from './pages/welcome';
 
 export const routes: Routes = [
   { path: '', component: Welcome },
@@ -17,6 +17,8 @@ export const routes: Routes = [
   { path: 'restablecer', component: Reset },
   { path: 'verificar-correo', component: Verify },
   { path: 'terminos', component: Terms },
+  { path: 'privacidad', component: Privacy },
+  { path: 'cookies', component: Cookies },
   { path: 'ejemplos', component: Examples },
   { path: 'p/:slug', component: PublicFolioPage },
   { path: 'p/:slug/:page', component: PublicFolioPage },

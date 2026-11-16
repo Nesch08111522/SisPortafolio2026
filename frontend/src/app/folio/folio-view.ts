@@ -112,7 +112,40 @@ export class FolioView implements OnChanges {
 
   pageKey(): string {
     const value = (this.page || this.current()).toLowerCase();
+    if (value === 'privacidad' || value === 'cookies' || value === 'terminos') return value;
     return this.pages.some((item) => item.id === value) ? value : 'inicio';
+  }
+
+  legal(): string {
+    const value = this.pageKey();
+    return value === 'privacidad' || value === 'cookies' || value === 'terminos' ? value : '';
+  }
+
+  legalTitle(): string {
+    return { privacidad: 'Política de privacidad', cookies: 'Cookies', terminos: 'Términos y condiciones' }[this.legal()] ?? '';
+  }
+
+  legalText(): string[] {
+    const name = `${this.view?.person.firstName ?? ''} ${this.view?.person.lastName ?? ''}`.trim();
+    if (this.legal() === 'privacidad') {
+      return [
+        `${name} publica en este sitio solo la información que decidió mostrar: nombre, trayectoria, proyectos y los medios de contacto activados.`,
+        'El correo de acceso, la contraseña y los documentos privados no forman parte de esta página.',
+        'Los mensajes del formulario de contacto llegan a la persona autora. No se venden datos ni se elaboran perfiles publicitarios.'
+      ];
+    }
+    if (this.legal() === 'cookies') {
+      return [
+        'Este sitio no inicia sesión por ti. La preferencia de cookies se guarda en tu navegador para no volver a preguntar.',
+        'Si aceptas el registro de visitas, se guarda la ruta y el tipo de dispositivo, sin una ubicación precisa.',
+        'Puedes elegir solo lo esencial y seguir leyendo el sitio.'
+      ];
+    }
+    return [
+      `El contenido de este sitio es responsabilidad de ${name}. Portfolio Hub no verifica colegiatura, títulos ni la exactitud de los proyectos.`,
+      'No debe publicarse información de pacientes, clientes identificables, menores ni expedientes.',
+      'La versión de estas condiciones es 2026-11.'
+    ];
   }
 
   pageLabel(): string {

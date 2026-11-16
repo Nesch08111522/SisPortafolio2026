@@ -39,6 +39,12 @@ public class AcademicRecord extends Timestamps {
     @Column(name = "career_id")
     private UUID careerId;
 
+    @Column(name = "career_name", length = 220)
+    private String careerName;
+
+    @Column(name = "career_kind", length = 20)
+    private String careerKind;
+
     @Column(name = "specialization_id")
     private UUID specializationId;
 

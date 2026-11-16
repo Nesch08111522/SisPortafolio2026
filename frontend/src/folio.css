@@ -1,0 +1,438 @@
+/* Sitios públicos. Cada familia conserva su composición; la página ocupa el viewport. */
+
+app-public-folio,
+app-folio-view { display: block; }
+body:has(app-public-folio) { background: var(--bg, #f7f4ef); }
+
+.folio {
+  border-radius: 0;
+  min-height: 100vh;
+  overflow: clip;
+}
+.folio-frame { width: min(1120px, calc(100% - 3rem)); padding: 0 0 4.5rem; }
+.folio-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem 0 2.2rem;
+}
+.folio[data-page="inicio"] .folio-hero { min-height: calc(100svh - 4.6rem); }
+.folio h1 { text-wrap: balance; font-weight: 560; }
+.folio h2 { font-size: clamp(1.7rem, 2.4vw, 2.35rem); line-height: 1.15; }
+.folio p { line-height: 1.65; font-size: 1.05rem; }
+.folio .kicker {
+  letter-spacing: 0;
+  text-transform: none;
+  font-size: 1.02rem;
+  font-weight: 650;
+  margin-bottom: .7rem;
+}
+.folio .where { margin: .15rem 0 0; color: var(--muted-folio); font-size: .98rem; }
+.folio .folio-hero .actions { margin-top: 1.5rem; gap: .65rem; }
+.folio a.button,
+.folio button.button,
+.folio button.send {
+  min-height: 46px;
+  padding: 0 1.15rem;
+  align-items: center;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  border: 1px solid transparent;
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.folio[data-button="outline"] a.button,
+.folio[data-button="outline"] button.button,
+.folio[data-button="outline"] button.send {
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.folio a.button:hover,
+.folio button.send:hover { background: var(--accent-2); color: #fff; }
+.folio[data-button="outline"] a.button:hover,
+.folio[data-button="outline"] button.send:hover { background: var(--accent); color: #fff; }
+
+.site-bar {
+  min-height: 68px;
+  padding: 0 clamp(1rem, 3vw, 2rem);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+}
+.site-bar strong { font-size: 1.15rem; }
+.site-nav { gap: .15rem 1.15rem; }
+.site-nav a,
+.site-nav button { border-bottom: 0; font-size: .98rem; position: relative; }
+.site-nav [aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: .55rem;
+  height: 2px;
+  background: var(--accent);
+}
+.folio a:focus-visible,
+.folio button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.folio-main > h2 {
+  margin: 1.6rem 0 0;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  line-height: 1;
+}
+.folio-block { margin-top: 3.2rem; }
+.folio .disclaimer {
+  margin-top: 1.6rem;
+  border: 0;
+  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  color: var(--text);
+}
+.folio .empty { border: 0; border-radius: 0; padding: 0; background: transparent; color: var(--muted-folio); }
+
+.folio .entry {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  padding: 1.15rem 0 1.2rem;
+  margin: 0;
+}
+.folio .entry h3 { margin: 0 0 .3rem; font-size: 1.4rem; }
+.folio .entry p { margin: .2rem 0; }
+
+.folio-block[data-component="projects"],
+.folio .gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.15rem;
+}
+.folio-block[data-component="projects"] > h2,
+.folio-block[data-component="projects"] > .empty,
+.folio .gallery > .empty { grid-column: 1 / -1; }
+.folio .project {
+  margin: 0;
+  padding: 1.15rem 1.15rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+  box-shadow: 0 18px 40px color-mix(in srgb, var(--text) 5%, transparent);
+  display: flex;
+  flex-direction: column;
+}
+.folio .project img {
+  width: calc(100% + 2.3rem);
+  max-width: none;
+  height: 240px;
+  margin: -1.15rem -1.15rem 1rem;
+  border-radius: 0;
+  object-fit: cover;
+}
+.folio .project h3 { margin: 0 0 .4rem; font-size: 1.45rem; }
+.folio .project a { color: var(--accent); font-weight: 650; text-underline-offset: .18rem; }
+.folio .chip {
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  padding: .35rem .7rem;
+}
+.folio[data-button="square"] .chip,
+.folio[data-layout="minimal"] .chip,
+.folio[data-layout="editorial"] .chip,
+.folio[data-layout="gazette"] .chip,
+.folio[data-layout="exhibit"] .chip,
+.folio[data-layout="fashion"] .chip { border-radius: 0; }
+
+.folio form { margin-top: .6rem; gap: .35rem; }
+.folio input,
+.folio textarea,
+.folio select {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+  border-radius: calc(var(--radius) * 1px);
+  min-height: 48px;
+}
+.folio textarea { min-height: 8rem; }
+.folio input:focus,
+.folio textarea:focus,
+.folio select:focus { border-color: var(--accent); outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent); outline-offset: 1px; }
+.folio[data-layout="tech"] input,
+.folio[data-layout="tech"] textarea,
+.folio[data-layout="tech"] select,
+.folio[data-layout="screen"] input,
+.folio[data-layout="screen"] textarea,
+.folio[data-layout="screen"] select,
+.folio[data-layout="dark"] input,
+.folio[data-layout="dark"] textarea,
+.folio[data-layout="dark"] select,
+.folio[data-mode="dark"] input,
+.folio[data-mode="dark"] textarea,
+.folio[data-mode="dark"] select {
+  background: rgba(255,255,255,.06);
+  color: inherit;
+  border-color: rgba(255,255,255,.18);
+}
+
+.folio-footer {
+  margin-top: 4.5rem;
+  padding-top: 1.2rem;
+  border-top: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  align-items: center;
+}
+.folio-footer a,
+.folio-footer button { text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+.folio-footer a:hover,
+.folio-footer button:hover { color: var(--text); }
+.wa {
+  width: 52px;
+  height: 52px;
+  bottom: 1.25rem;
+  background: #128c7e;
+  box-shadow: 0 10px 24px rgba(18, 140, 126, .28);
+}
+.wa svg { width: 26px; height: 26px; fill: none; stroke: #fff; stroke-width: 1.6; stroke-linejoin: round; }
+
+/* Académico: cuaderno de facultad, filete doble y fichas al margen. */
+.folio[data-layout="academic"] { background: var(--bg); }
+.folio[data-layout="academic"] .folio-frame { width: min(860px, calc(100% - 3rem)); }
+.folio[data-layout="academic"][data-page="inicio"] .folio-hero {
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--accent);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--accent) 35%, transparent);
+  padding-bottom: 1.6rem;
+}
+.folio[data-layout="academic"] h1 { max-width: 16ch; font-size: clamp(2.8rem, 6vw, 4.6rem); }
+.folio[data-layout="academic"] .entry { border-bottom: 0; border-left: 2px solid var(--accent); padding: .2rem 0 1.1rem 1rem; margin-bottom: 1rem; }
+
+/* Diario: mancheta centrada y columnas de lectura. */
+.folio[data-layout="gazette"] .folio-hero { align-items: center; text-align: center; border-top: 4px solid var(--text); border-bottom: 1px solid var(--text); padding-top: 1.4rem; }
+.folio[data-layout="gazette"] h1 { max-width: none; font-size: clamp(3rem, 7vw, 5.4rem); }
+.folio[data-layout="gazette"] .folio-hero p { margin-inline: auto; }
+.folio[data-layout="gazette"] .kicker { letter-spacing: .14em; text-transform: uppercase; font-size: .78rem; font-weight: 650; }
+.folio[data-layout="gazette"] .folio-block[data-component="richtext"] > p:first-of-type::first-letter {
+  font-family: var(--heading);
+  float: left;
+  font-size: 3.4rem;
+  line-height: .8;
+  padding: .15rem .4rem 0 0;
+  color: var(--accent);
+}
+
+/* Revista: el nombre es la portada. */
+.folio[data-layout="editorial"] .folio-frame { width: min(920px, calc(100% - 3rem)); }
+.folio[data-layout="editorial"] h1 { font-size: clamp(3.8rem, 10vw, 7.2rem); max-width: 9ch; }
+.folio[data-layout="editorial"] .folio-hero p { font-family: var(--heading); font-size: clamp(1.25rem, 2vw, 1.6rem); line-height: 1.35; max-width: 28ch; }
+.folio[data-layout="editorial"] .project,
+.folio[data-layout="editorial"] .entry { background: transparent; border: 0; box-shadow: none; padding-left: 0; padding-right: 0; }
+.folio[data-layout="editorial"] .project { border-top: 1px solid color-mix(in srgb, var(--text) 18%, transparent); border-radius: 0; }
+.folio[data-layout="editorial"] .folio-block[data-component="projects"] { grid-template-columns: 1fr; }
+
+/* Ejecutivo: portada de carbón a todo el ancho y expedientes en fila. */
+.folio[data-layout="executive"] .site-bar { background: #161513; color: #f6f1e8; border-bottom-color: rgba(255,255,255,.08); }
+.folio[data-layout="executive"] .folio-frame { width: 100%; padding: 0 0 4rem; }
+.folio[data-layout="executive"] .folio-hero {
+  margin: 0;
+  min-height: 62vh;
+  padding: clamp(2.5rem, 7vw, 5rem) clamp(1.25rem, 6vw, 5.5rem);
+  background: #161513;
+  color: #f6f1e8;
+}
+.folio[data-layout="executive"][data-page="inicio"] .folio-hero { min-height: calc(100svh - 4.6rem); }
+.folio[data-layout="executive"] .kicker,
+.folio[data-layout="executive"] .folio-hero p,
+.folio[data-layout="executive"] .where { color: #e7e0d4; }
+.folio[data-layout="executive"] .folio-hero a.button,
+.folio[data-layout="executive"] .folio-hero button.button { background: #f6f1e8; color: #161513; }
+.folio[data-layout="executive"] .folio-hero a.button:hover,
+.folio[data-layout="executive"] .folio-hero button.button:hover { background: var(--accent); color: #fff; }
+.folio[data-layout="executive"] .folio-main { width: min(1040px, calc(100% - 2.5rem)); margin: 0 auto; }
+.folio[data-layout="executive"] .project { grid-template-columns: 1fr; }
+
+/* Tecnología: campo nocturno, el acento solo en la arista de cada pieza. */
+.folio[data-layout="tech"] {
+  background:
+    radial-gradient(720px 320px at 100% 0, color-mix(in srgb, var(--accent) 32%, transparent), transparent 68%),
+    #0c1116;
+  color: #f4f7fb;
+}
+.folio[data-layout="tech"] .site-bar { background: rgba(12, 17, 22, .82); color: #f4f7fb; border-bottom-color: rgba(255,255,255,.08); }
+.folio[data-layout="tech"] .kicker { font-family: "IBM Plex Mono", ui-monospace, monospace; letter-spacing: .08em; text-transform: uppercase; font-size: .75rem; font-weight: 500; color: var(--accent-2); }
+.folio[data-layout="tech"] .where,
+.folio[data-layout="tech"] .folio-hero p,
+.folio[data-layout="tech"] .folio-footer { color: #d5ddd9; }
+.folio[data-layout="tech"] h1 { font-family: "Space Grotesk", var(--heading); max-width: 12ch; }
+.folio[data-layout="tech"] .project,
+.folio[data-layout="tech"] .entry {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  border-top: 2px solid var(--accent);
+  box-shadow: none;
+  color: inherit;
+}
+.folio[data-layout="tech"] .chip { background: transparent; color: inherit; border-radius: 999px; }
+.folio[data-layout="tech"] .folio-block[data-component="skills"] .chips { display: flex; }
+
+/* Exposición: cada pieza es una lámina con su ficha. */
+.folio[data-layout="exhibit"] { background: var(--bg); }
+.folio[data-layout="exhibit"] .folio-frame { width: min(1180px, calc(100% - 3rem)); }
+.folio[data-layout="exhibit"] .folio-hero { align-items: flex-start; padding: 2rem 1.4rem; border: 1px solid color-mix(in srgb, var(--text) 16%, transparent); margin-top: 1.4rem; }
+.folio[data-layout="exhibit"][data-page="inicio"] .folio-hero { min-height: calc(100svh - 7rem); }
+.folio[data-layout="exhibit"] h1 { font-size: clamp(3rem, 7vw, 5.6rem); max-width: 10ch; }
+.folio[data-layout="exhibit"] .project,
+.folio[data-layout="exhibit"] .entry {
+  min-height: 0;
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text) 18%, transparent);
+  box-shadow: none;
+  border-radius: 0;
+}
+.folio[data-layout="exhibit"] .project img { height: 320px; }
+.folio .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+/* Creativo: cartel a sangre y retícula irregular. */
+.folio[data-layout="creative"] .site-bar {
+  position: absolute; left: 0; right: 0; top: 0; z-index: 6;
+  background: transparent; color: #fff; border-bottom: 0;
+}
+.folio[data-layout="creative"] .site-nav [aria-current="page"]::after { background: #fff; }
+.folio[data-layout="creative"] .folio-frame { width: min(1180px, calc(100% - 2rem)); }
+.folio[data-layout="creative"] .folio-hero {
+  margin-inline: calc(50% - 50cqw);
+  border-radius: 0;
+  min-height: 74vh;
+  padding: clamp(2rem, 6vw, 4.5rem);
+  align-items: flex-start;
+  justify-content: flex-end;
+  background: linear-gradient(160deg, var(--accent) 0%, color-mix(in srgb, var(--accent-2) 55%, var(--accent)) 100%);
+  color: #fff;
+}
+.folio[data-layout="creative"][data-page="inicio"] .folio-hero { min-height: 100svh; margin-top: 0; padding-top: 6.5rem; }
+.folio[data-layout="creative"] .kicker,
+.folio[data-layout="creative"] .folio-hero p,
+.folio[data-layout="creative"] .where { color: #fff; }
+.folio[data-layout="creative"] .folio-hero a.button,
+.folio[data-layout="creative"] .folio-hero button.button { background: #fff; color: var(--accent); }
+.folio[data-layout="creative"] .folio-hero a.button:hover,
+.folio[data-layout="creative"] .folio-hero button.button:hover { background: var(--accent-2); color: #1f1220; }
+.folio[data-layout="creative"] .folio-block[data-component="projects"],
+.folio[data-layout="creative"] .gallery { grid-template-columns: 1.35fr .75fr; }
+.folio[data-layout="creative"] .project:first-of-type,
+.folio[data-layout="creative"] .gallery .project:first-child { grid-row: span 2; background: var(--accent); color: #fff; border: 0; }
+
+/* Corporativo: columna de identidad que acompaña la lectura. */
+.folio[data-layout="corporate"] .folio-hero {
+  position: sticky;
+  top: 68px;
+  align-self: start;
+  min-height: calc(100vh - 68px);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 82%, black), var(--accent));
+  padding: 2rem 1.5rem 2.2rem;
+}
+.folio[data-layout="corporate"] h1 { font-size: clamp(2.1rem, 3vw, 3rem); }
+.folio[data-layout="corporate"] .folio-hero a.button,
+.folio[data-layout="corporate"] .folio-hero button.button { background: #fff; color: var(--accent); }
+.folio[data-layout="corporate"] .folio-hero a.button:hover,
+.folio[data-layout="corporate"] .folio-hero button.button:hover { background: var(--accent-2); color: #fff; }
+.folio[data-layout="corporate"] .folio-main { padding: 2.4rem 2rem 3rem; }
+.folio[data-layout="corporate"] .folio-block[data-component="projects"] { grid-template-columns: 1fr 1fr; }
+
+/* Interiores: un lavado de material y una columna estrecha. */
+.folio[data-layout="interior"] {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-2) 55%, var(--bg)) 0, var(--bg) 22rem);
+}
+.folio[data-layout="interior"] .folio-frame { width: min(760px, calc(100% - 3rem)); }
+.folio[data-layout="interior"] .folio-hero {
+  margin-inline: calc(50% - 50cqw);
+  min-height: 70vh;
+  padding: clamp(2rem, 6vw, 4rem);
+  justify-content: flex-end;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--accent) 88%, black));
+  color: #f7f3ec;
+}
+.folio[data-layout="interior"][data-page="inicio"] .folio-hero { min-height: calc(100svh - 4.6rem); }
+.folio[data-layout="interior"] .kicker,
+.folio[data-layout="interior"] .folio-hero p,
+.folio[data-layout="interior"] .where { color: #f3eadf; }
+.folio[data-layout="interior"] .folio-block { max-width: 40rem; }
+
+/* Cine: el nombre queda entre dos líneas, como un crédito. */
+.folio[data-layout="screen"] { background: #101014; color: #f6f1e8; }
+.folio[data-layout="screen"] .site-bar { background: rgba(16, 16, 20, .9); color: #f6f1e8; border-bottom-color: rgba(244, 231, 197, .2); }
+.folio[data-layout="screen"] .folio-hero { min-height: 78vh; align-items: center; text-align: center; justify-content: center; border-block: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); margin-top: 1.5rem; }
+.folio[data-layout="screen"][data-page="inicio"] .folio-hero { min-height: calc(100svh - 8rem); }
+.folio[data-layout="screen"] h1 { font-style: italic; max-width: 12ch; font-size: clamp(3.6rem, 8vw, 6.6rem); }
+.folio[data-layout="screen"] .folio-hero p { margin-inline: auto; color: #e7e0d4; }
+.folio[data-layout="screen"] .project,
+.folio[data-layout="screen"] .entry { background: #17171c; border-color: rgba(244, 231, 197, .28); color: inherit; box-shadow: none; }
+
+/* Premium: mucho aire y el trabajo en dos columnas. */
+.folio[data-layout="premium"] .folio-frame { width: min(1180px, calc(100% - 3rem)); }
+.folio[data-layout="premium"][data-page="inicio"] .folio-hero { min-height: calc(100svh - 4.6rem); border-bottom: 1px solid color-mix(in srgb, var(--text) 12%, transparent); }
+.folio[data-layout="premium"] h1 { font-size: clamp(3.6rem, 8vw, 6.8rem); max-width: 10ch; }
+
+/* Estudio: el nombre y el relato se miran. */
+.folio[data-layout="studio"] .folio-frame { width: min(1180px, calc(100% - 3rem)); padding-top: 1rem; }
+.folio[data-layout="studio"][data-page="inicio"] .folio-hero { min-height: calc(100svh - 6rem); }
+.folio[data-layout="studio"] .folio-main { padding-top: 1rem; }
+
+/* Moda: tres piezas en vitrina. */
+.folio[data-layout="fashion"] .folio-frame { width: min(1100px, calc(100% - 3rem)); }
+.folio[data-layout="fashion"] h1 { font-weight: 460; font-size: clamp(3.4rem, 8vw, 6rem); }
+.folio[data-layout="fashion"] .folio-block[data-component="projects"] { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .7rem; }
+.folio[data-layout="fashion"] .project img { height: 340px; }
+.folio[data-layout="fashion"] .project { border-radius: 0; box-shadow: none; }
+
+/* Oscuro: oro solo en el borde. */
+.folio[data-layout="dark"] { background: #101114; color: #f6f1e8; }
+.folio[data-layout="dark"] .site-bar { background: rgba(16, 17, 20, .9); color: #f6f1e8; }
+.folio[data-layout="dark"] .folio-hero p,
+.folio[data-layout="dark"] .where { color: #e7e0d4; }
+.folio[data-layout="dark"] .project,
+.folio[data-layout="dark"] .entry { background: #191b20; border: 1px solid rgba(214, 176, 106, .35); box-shadow: none; color: inherit; }
+.folio[data-layout="dark"] .chip { background: transparent; color: inherit; }
+
+/* Mínimo: una columna y ninguna tarjeta. */
+.folio[data-layout="minimal"] .folio-frame { width: min(740px, calc(100% - 3rem)); }
+.folio[data-layout="minimal"][data-page="inicio"] .folio-hero { min-height: calc(100svh - 5rem); }
+.folio[data-layout="minimal"] .project,
+.folio[data-layout="minimal"] .entry { background: transparent; border: 0; border-bottom: 1px solid color-mix(in srgb, var(--text) 14%, transparent); border-radius: 0; box-shadow: none; padding-left: 0; padding-right: 0; }
+.folio[data-layout="minimal"] .folio-block[data-component="projects"] { grid-template-columns: 1fr; }
+
+/* Experimental: el ritmo se desplaza, el tipo se queda quieto. */
+.folio[data-layout="experimental"] .folio-block[data-component="projects"] { grid-template-columns: 1fr; }
+
+.folio-hero:has(.folio-photo) {
+  display: grid;
+  grid-template-columns: minmax(140px, 210px) minmax(0, 1fr);
+  align-items: end;
+  gap: 1.5rem 2rem;
+}
+.folio-photo { width: 100%; height: auto; aspect-ratio: 4 / 5; margin: 0; }
+
+@container (max-width: 760px) {
+  .folio-frame { width: min(100% - 1.5rem, 1120px); }
+  .folio[data-page="inicio"] .folio-hero,
+  .folio[data-layout="creative"][data-page="inicio"] .folio-hero,
+  .folio[data-layout="executive"][data-page="inicio"] .folio-hero,
+  .folio[data-layout="screen"] .folio-hero,
+  .folio[data-layout="interior"] .folio-hero { min-height: auto; padding-top: 2.4rem; margin-top: 0; }
+  .folio[data-layout="creative"][data-page="inicio"] .folio-hero { min-height: 78svh; }
+  .folio-block[data-component="projects"],
+  .folio .gallery,
+  .folio[data-layout="fashion"] .folio-block[data-component="projects"],
+  .folio[data-layout="creative"] .folio-block[data-component="projects"],
+  .folio[data-layout="corporate"] .folio-block[data-component="projects"] { grid-template-columns: 1fr; }
+  .folio[data-layout="creative"] .project:first-of-type { grid-row: auto; }
+  .folio-hero:has(.folio-photo) { grid-template-columns: 1fr; }
+  .folio-photo { width: 148px; }
+  .site-nav { flex: 1 1 100%; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; }
+  .site-nav a, .site-nav button { white-space: nowrap; }
+  .folio[data-layout="corporate"] .folio-hero { position: static; min-height: auto; }
+  .folio[data-layout="gazette"] .folio-main { columns: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .folio a.button, .folio button.send { transition: none; }
+}

@@ -130,6 +130,9 @@ public class ProfileService {
         personal.setPhone(phone(update.phone()));
         personal.setProfessionalEmail(emailOrNull(update.professionalEmail()));
         applyLocation(personal, update);
+        if (personal.getCountryId() != null) {
+            countries.findById(personal.getCountryId()).ifPresent(country -> user.setCountryCode(country.getIso2()));
+        }
         ProfessionalProfile professional = professionalProfiles.findById(userId).orElseThrow();
         professional.setLinkedin(Texts.cleanLink(update.linkedin()));
         professional.setGithub(Texts.cleanLink(update.github()));
@@ -172,8 +175,12 @@ public class ProfileService {
             Career career = careers.findById(update.careerId()).filter(Career::isActive)
                     .orElseThrow(() -> ApiException.badRequest("INVALID_CAREER", "Selecciona una carrera válida."));
             record.setCareerId(career.getId());
+            record.setCareerName(career.getName());
+            record.setCareerKind(update.careerKind() == null || update.careerKind().isBlank() ? "UNIVERSITY" : update.careerKind());
         } else {
             record.setCareerId(null);
+            record.setCareerName(Texts.limit(update.careerName(), 220));
+            record.setCareerKind(Texts.limit(update.careerKind(), 20));
         }
         if (update.specializationId() != null) {
             Specialization specialization = specializations.findById(update.specializationId())
@@ -322,6 +329,8 @@ public class ProfileService {
         view.put("universityName", record.getUniversityName());
         view.put("facultyId", record.getFacultyId());
         view.put("careerId", record.getCareerId());
+        view.put("careerName", record.getCareerName());
+        view.put("careerKind", record.getCareerKind());
         view.put("specializationId", record.getSpecializationId());
         view.put("semester", record.getSemester());
         view.put("admissionYear", record.getAdmissionYear());
@@ -340,6 +349,12 @@ public class ProfileService {
             districts.findById(personal.getDistrictId()).ifPresent(item -> parts.add(item.getName()));
         } else if (personal.getCustomDistrict() != null) {
             parts.add(personal.getCustomDistrict());
+        }
+        if (personal.getCustomRegion() != null) {
+            parts.add(personal.getCustomRegion());
+        }
+        if (personal.getCustomProvince() != null) {
+            parts.add(personal.getCustomProvince());
         }
         if (personal.getCityId() != null) {
             cities.findById(personal.getCityId()).ifPresent(item -> parts.add(item.getName()));
@@ -429,7 +444,9 @@ public class ProfileService {
             String relevantCourses,
             String interests,
             String professionalGoals,
-            boolean licenseDeclared
+            boolean licenseDeclared,
+            String careerName,
+            String careerKind
     ) {
     }
 }

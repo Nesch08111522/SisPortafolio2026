@@ -28,7 +28,7 @@ export class AuthService {
   private readonly raw = new HttpClient(inject(HttpBackend));
   private readonly router = inject(Router);
   readonly user = signal<UserView | null>(this.readUser());
-  readonly accessToken = signal<string | null>(sessionStorage.getItem('ph_access'));
+  readonly accessToken = signal<string | null>(this.stored('ph_access'));
 
   async ensureSession(): Promise<boolean> {
     const token = this.accessToken();
@@ -50,16 +50,21 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${API}/auth/login`, { email, password });
   }
 
-  persist(response: AuthResponse): void {
-    sessionStorage.setItem('ph_access', response.accessToken);
-    sessionStorage.setItem('ph_refresh', response.refreshToken);
-    sessionStorage.setItem('ph_user', JSON.stringify(response.user));
+  persist(response: AuthResponse, remember = localStorage.getItem('ph_remember') === '1'): void {
+    const store = remember ? localStorage : sessionStorage;
+    const other = remember ? sessionStorage : localStorage;
+    for (const key of ['ph_access', 'ph_refresh', 'ph_user']) other.removeItem(key);
+    if (remember) localStorage.setItem('ph_remember', '1');
+    else localStorage.removeItem('ph_remember');
+    store.setItem('ph_access', response.accessToken);
+    store.setItem('ph_refresh', response.refreshToken);
+    store.setItem('ph_user', JSON.stringify(response.user));
     this.accessToken.set(response.accessToken);
     this.user.set(response.user);
   }
 
   async refresh(): Promise<boolean> {
-    const refreshToken = sessionStorage.getItem('ph_refresh');
+    const refreshToken = this.stored('ph_refresh');
     if (!refreshToken) {
       return false;
     }
@@ -76,7 +81,7 @@ export class AuthService {
   }
 
   logout(): void {
-    const refreshToken = sessionStorage.getItem('ph_refresh');
+    const refreshToken = this.stored('ph_refresh');
     this.http.post(`${API}/auth/logout`, { refreshToken }).subscribe({ complete: () => this.exit(), error: () => this.exit() });
   }
 
@@ -86,15 +91,22 @@ export class AuthService {
   }
 
   private clear(): void {
-    sessionStorage.removeItem('ph_access');
-    sessionStorage.removeItem('ph_refresh');
-    sessionStorage.removeItem('ph_user');
+    for (const store of [sessionStorage, localStorage]) {
+      store.removeItem('ph_access');
+      store.removeItem('ph_refresh');
+      store.removeItem('ph_user');
+    }
+    localStorage.removeItem('ph_remember');
     this.accessToken.set(null);
     this.user.set(null);
   }
 
+  private stored(key: string): string | null {
+    return sessionStorage.getItem(key) ?? localStorage.getItem(key);
+  }
+
   private readUser(): UserView | null {
-    const raw = sessionStorage.getItem('ph_user');
+    const raw = this.stored('ph_user');
     return raw ? JSON.parse(raw) as UserView : null;
   }
 

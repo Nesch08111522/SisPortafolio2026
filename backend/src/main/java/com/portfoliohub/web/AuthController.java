@@ -93,7 +93,7 @@ public class AuthController {
             @Email @NotBlank String email,
             @NotBlank String password,
             @NotBlank String confirmPassword,
-            @NotBlank String countryCode,
+            String countryCode,
             boolean acceptTerms
     ) {
     }

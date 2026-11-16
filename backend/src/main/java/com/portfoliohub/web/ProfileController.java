@@ -51,7 +51,7 @@ public class ProfileController {
         return profiles.updateAcademic(CurrentUser.id(), new ProfileService.AcademicUpdate(
                 body.universityId(), body.universityName(), body.facultyId(), body.careerId(), body.specializationId(),
                 body.semester(), body.admissionYear(), body.expectedGraduation(), body.status(), body.relevantCourses(),
-                body.interests(), body.professionalGoals(), body.licenseDeclared()
+                body.interests(), body.professionalGoals(), body.licenseDeclared(), body.careerName(), body.careerKind()
         ));
     }
 
@@ -70,7 +70,8 @@ public class ProfileController {
     public record AcademicBody(
             UUID universityId, String universityName, UUID facultyId, UUID careerId, UUID specializationId,
             String semester, Integer admissionYear, LocalDate expectedGraduation, AcademicStatus status,
-            String relevantCourses, String interests, String professionalGoals, boolean licenseDeclared
+            String relevantCourses, String interests, String professionalGoals, boolean licenseDeclared,
+            String careerName, String careerKind
     ) {
     }
 }

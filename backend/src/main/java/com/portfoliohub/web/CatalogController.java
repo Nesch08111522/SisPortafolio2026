@@ -47,6 +47,21 @@ public class CatalogController {
         return catalogService.specializations(careerId);
     }
 
+    @GetMapping("/world/places")
+    public Map<String, Object> worldPlaces(@RequestParam(defaultValue = "") String country, @RequestParam(defaultValue = "") String region) {
+        return catalogService.worldPlaces(country, region);
+    }
+
+    @GetMapping("/world/careers")
+    public List<Map<String, String>> worldCareers(@RequestParam(defaultValue = "") String kind, @RequestParam(defaultValue = "") String q) {
+        return catalogService.worldCareers(kind, q);
+    }
+
+    @GetMapping("/world/universities")
+    public List<Map<String, String>> worldUniversities(@RequestParam(defaultValue = "") String country, @RequestParam(defaultValue = "") String name) {
+        return catalogService.worldUniversities(country, name);
+    }
+
     @GetMapping("/universities")
     public Page<?> universities(
             @RequestParam(required = false) String q,
